@@ -78,12 +78,15 @@ Source3:	kernel-bare-vserver-config.h
 Source20:	kernel-bare-vserver-i386.config
 Source21:	kernel-bare-vserver-x86_64.config
 
+
 # from http://vserver.13thfloor.at/Experimental/
 Patch100:	linux-2.6-vs2.3.patch
+# minimal grsecurity for vserver patched kernel
+Patch101:	linux-2.6-grsec-vs-minimal.patch
 # from squashfs: http://dl.sourceforge.net/sourceforge/squashfs/squashfs3.3.tar.gz for linux-2.6.23
-Patch101:	linux-2.6-squashfs.patch
+Patch102:	linux-2.6-squashfs.patch
 # official vendor driver for Marvell Yukon gigabit adapters, v10.22.4.3
-Patch102:	linux-2.6.22-sk98lin.patch
+Patch103:	linux-2.6.22-sk98lin.patch
 
 URL:		http://www.kernel.org/
 BuildRequires:	binutils >= 3:2.14.90.0.7
@@ -387,9 +390,12 @@ Documentation.
 %{__bzip2} -dc %{SOURCE10} | %{__patch} -p1 -s
 %endif
 
+
 %patch100 -p1
 %patch101 -p1
 %patch102 -p1
+%patch103 -p1
+
 
 # Fix EXTRAVERSION in main Makefile
 sed -i 's#EXTRAVERSION =.*#EXTRAVERSION = %{_postver}_%{alt_kernel}#g' Makefile

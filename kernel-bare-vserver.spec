@@ -42,7 +42,7 @@
 
 %define		_basever	2.6.22
 %define		_postver	.12
-%define		_rel		2
+%define		_rel		3
 
 # for rc kernels basever is the version patch (source1) should be applied to
 #%define		_ver		2.6.20
@@ -155,7 +155,7 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 %endif
 
 %define __features Enabled features:\
-%{?debug:- DEBUG}\
+%{?debug: - DEBUG}\
 %define Features %(echo "%{__features}" | sed '/^$/d')
 # vim: "
 
@@ -629,8 +629,8 @@ mv -f %{initrd_dir}/initrd-%{alt_kernel} %{initrd_dir}/initrd-%{alt_kernel}.old 
 ln -sf initrd-%{kernel_release}.gz %{initrd_dir}/initrd-%{alt_kernel}
 
 if [ -x /sbin/new-kernel-pkg ]; then
-if [ -f %{_sysconfdir}/pld-release ]; then
-title=$(sed 's/^[0-9.]\+ //' < %{_sysconfdir}/pld-release)
+	if [ -f /etc/pld-release ]; then
+		title=$(sed 's/^[0-9.]\+ //' < /etc/pld-release)
 	else
 		title='PLD Linux'
 	fi
@@ -671,14 +671,14 @@ ln -sf vmlinux-%{kernel_release} /boot/vmlinux-%{alt_kernel}
 %depmod %{kernel_release}
 
 %post headers
-rm -f %{_kernelsrcdir}-%{alt_kernel}
-ln -snf %{basename:%{_kernelsrcdir}} %{_kernelsrcdir}-%{alt_kernel}
+rm -f %{_prefix}/src/linux-%{alt_kernel}
+ln -snf %{basename:%{_kernelsrcdir}} %{_prefix}/src/linux-%{alt_kernel}
 
 %postun headers
 if [ "$1" = "0" ]; then
-	if [ -L %{_kernelsrcdir}-%{alt_kernel} ]; then
-		if [ "$(readlink %{_kernelsrcdir}-%{alt_kernel})" = "linux-%{version}_%{alt_kernel}" ]; then
-			rm -f %{_kernelsrcdir}-%{alt_kernel}
+	if [ -L %{_prefix}/src/linux-%{alt_kernel} ]; then
+		if [ "$(readlink %{_prefix}/src/linux-%{alt_kernel})" = "linux-%{version}_%{alt_kernel}" ]; then
+			rm -f %{_prefix}/src/linux-%{alt_kernel}
 		fi
 	fi
 fi
@@ -833,7 +833,7 @@ fi
 %exclude %{_kernelsrcdir}/scripts/*.sh
 %{_kernelsrcdir}/sound
 %{_kernelsrcdir}/security
-%{_kernelsrcdir}%{_prefix}
+%{_kernelsrcdir}/usr
 %{_kernelsrcdir}/COPYING
 %{_kernelsrcdir}/CREDITS
 %{_kernelsrcdir}/MAINTAINERS

@@ -42,7 +42,7 @@
 
 %define		_basever	2.6.22
 %define		_postver	.12
-%define		_rel		1
+%define		_rel		2
 
 # for rc kernels basever is the version patch (source1) should be applied to
 #%define		_ver		2.6.20
@@ -83,8 +83,8 @@ Source21:	kernel-bare-vserver-x86_64.config
 Patch100:	linux-2.6-vs2.3.patch
 # minimal grsecurity for vserver patched kernel
 Patch101:	linux-2.6-grsec-vs-minimal.patch
-# from squashfs: http://dl.sourceforge.net/sourceforge/squashfs/squashfs3.3.tar.gz for linux-2.6.23
-Patch102:	linux-2.6-squashfs.patch
+# from squashfs: http://dl.sourceforge.net/sourceforge/squashfs/squashfs3.3.tar.gz for linux-2.6.22
+Patch102:	linux-2.6.22-squashfs.patch
 # official vendor driver for Marvell Yukon gigabit adapters, v10.22.4.3
 Patch103:	linux-2.6.22-sk98lin.patch
 

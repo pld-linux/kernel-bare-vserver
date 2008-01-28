@@ -75,7 +75,7 @@ Source10:	http://www.kernel.org/pub/linux/kernel/v2.6/testing/patch-%{_ver}-%{_r
 Source2:	kernel-bare-vserver-module-build.pl
 Source3:	kernel-bare-vserver-config.h
 
-Source20:	kernel-bare-vserver-i386.config
+Source20:	kernel-bare-vserver-x86.config
 Source21:	kernel-bare-vserver-x86_64.config
 
 

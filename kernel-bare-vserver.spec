@@ -42,7 +42,7 @@
 
 %define		_basever	2.6.22
 %define		_postver	.16
-%define		_rel		1
+%define		_rel		2
 
 # for rc kernels basever is the version patch (source1) should be applied to
 #%define		_ver		2.6.20
@@ -721,6 +721,7 @@ fi
 %exclude /lib/modules/%{kernel_release}/kernel/drivers/usb/host/sl811_cs.ko*
 %endif
 /lib/modules/%{kernel_release}/build
+%ghost %{_kernelsrcdir}
 %ghost /lib/modules/%{kernel_release}/modules.*
 %dir %{_sysconfdir}/modprobe.d/%{kernel_release}
 

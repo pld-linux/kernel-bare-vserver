@@ -41,8 +41,8 @@
 %define		alt_kernel	bare-vserver
 
 %define		_basever	2.6.22
-%define		_postver	.16
-%define		_rel		4
+%define		_postver	.17
+%define		_rel		1
 
 # for rc kernels basever is the version patch (source1) should be applied to
 #%define		_ver		2.6.20
@@ -65,7 +65,7 @@ Source0:	http://www.kernel.org/pub/linux/kernel/v2.6/linux-%{_basever}.tar.bz2
 # Source0-md5:	2e230d005c002fb3d38a3ca07c0200d0
 %if "%{_postver}" != "%{nil}"
 Source1:	http://www.kernel.org/pub/linux/kernel/v2.6/patch-%{_basever}%{_postver}.bz2
-# Source1-md5:	677f4eec305e7893e74b24e7349d4b80
+# Source1-md5:	ce718cef495696c2d446bd8ff170c519
 %endif
 %if "%{_ver}" != "%{nil}"
 Source10:	http://www.kernel.org/pub/linux/kernel/v2.6/testing/patch-%{_ver}-%{_rc}.bz2

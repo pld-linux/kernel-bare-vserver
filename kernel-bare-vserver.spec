@@ -41,8 +41,8 @@
 %define		alt_kernel	bare-vserver
 
 %define		_basever	2.6.22
-%define		_postver	.17
-%define		_rel		2
+%define		_postver	.18
+%define		_rel		1
 
 # for rc kernels basever is the version patch (source1) should be applied to
 #%define		_ver		2.6.20
@@ -65,7 +65,7 @@ Source0:	http://www.kernel.org/pub/linux/kernel/v2.6/linux-%{_basever}.tar.bz2
 # Source0-md5:	2e230d005c002fb3d38a3ca07c0200d0
 %if "%{_postver}" != "%{nil}"
 Source1:	http://www.kernel.org/pub/linux/kernel/v2.6/patch-%{_basever}%{_postver}.bz2
-# Source1-md5:	ce718cef495696c2d446bd8ff170c519
+# Source1-md5:	639fe3f8e676a349ba74c5405f09dd99
 %endif
 %if "%{_ver}" != "%{nil}"
 Source10:	http://www.kernel.org/pub/linux/kernel/v2.6/testing/patch-%{_ver}-%{_rc}.bz2
@@ -87,9 +87,6 @@ Patch101:	linux-2.6-grsec-vs-minimal.patch
 Patch102:	linux-2.6.22-squashfs.patch
 # official vendor driver for Marvell Yukon gigabit adapters, v10.22.4.3
 Patch103:	linux-2.6.22-sk98lin.patch
-
-# security bugfix
-Patch200:	kernel-vmsplice.patch
 
 URL:		http://www.kernel.org/
 BuildRequires:	binutils >= 3:2.14.90.0.7
@@ -398,8 +395,6 @@ Documentation.
 %patch101 -p1
 %patch102 -p1
 %patch103 -p1
-
-%patch200 -p1
 
 # Fix EXTRAVERSION in main Makefile
 sed -i 's#EXTRAVERSION =.*#EXTRAVERSION = %{_postver}_%{alt_kernel}#g' Makefile

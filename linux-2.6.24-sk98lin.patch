@@ -33380,7 +33380,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skgeasfconv.c linux-2.6.24/drive
 +
 diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/sk98lin/skge.c
 --- linux-2.6.24.orig/drivers/net/sk98lin/skge.c	2008-02-28 11:23:42.000000000 +0100
-+++ linux-2.6.24/drivers/net/sk98lin/skge.c	2008-02-28 11:25:13.000000000 +0100
++++ linux-2.6.24/drivers/net/sk98lin/skge.c	2008-02-28 11:30:04.000000000 +0100
 @@ -1,32 +1,26 @@
  /******************************************************************************
   *
@@ -33422,7 +33422,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
   *	This program is free software; you can redistribute it and/or modify
   *	it under the terms of the GNU General Public License as published by
   *	the Free Software Foundation; either version 2 of the License, or
-@@ -38,86 +32,62 @@
+@@ -38,86 +32,66 @@
  
  /******************************************************************************
   *
@@ -33550,10 +33550,14 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
 +#endif
 +
 +#define ENABLE_FUTURE_ETH
++
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24)
++#define		proc_net	init_net.proc_net
++#endif
  
  /*******************************************************************************
   *
-@@ -128,62 +98,15 @@
+@@ -128,62 +102,15 @@
  /* for debuging on x86 only */
  /* #define BREAKPOINT() asm(" int $3"); */
  
@@ -33619,7 +33623,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  
  
  /*******************************************************************************
-@@ -192,14 +115,39 @@
+@@ -192,14 +119,39 @@
   *
   ******************************************************************************/
  
@@ -33660,7 +33664,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  static int	SkGeOpen(struct SK_NET_DEVICE *dev);
  static int	SkGeClose(struct SK_NET_DEVICE *dev);
  static int	SkGeXmit(struct sk_buff *skb, struct SK_NET_DEVICE *dev);
-@@ -208,39 +156,105 @@
+@@ -208,39 +160,105 @@
  static struct	net_device_stats *SkGeStats(struct SK_NET_DEVICE *dev);
  static int	SkGeIoctl(struct SK_NET_DEVICE *dev, struct ifreq *rq, int cmd);
  static void	GetConfiguration(SK_AC*);
@@ -33776,7 +33780,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  
  #ifdef DEBUG
  static void	DumpMsg(struct sk_buff*, char*);
-@@ -249,33 +263,409 @@
+@@ -249,33 +267,408 @@
  #endif
  
  /* global variables *********************************************************/
@@ -33961,7 +33965,6 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
 +		return -ENODEV;
 +	}
 +
-+	SET_MODULE_OWNER(dev);
 +#ifdef ENABLE_FUTURE_ETH
 +	SET_ETHTOOL_OPS(dev, &sk98lin_ethtool_ops);
 +#endif
@@ -34199,7 +34202,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  
  /*****************************************************************************
   *
-@@ -284,22 +674,26 @@
+@@ -284,22 +677,26 @@
   * Description:
   *	This function initialize the PCI resources and IO
   *
@@ -34233,7 +34236,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  
  #ifdef SK_BIG_ENDIAN
  	/*
-@@ -318,18 +712,621 @@
+@@ -318,18 +715,621 @@
  	 * Remap the regs into kernel space.
  	 */
  	pAC->IoBase = ioremap_nocache(dev->mem_start, 0x4000);
@@ -34863,7 +34866,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  
  
  /*****************************************************************************
-@@ -349,20 +1346,24 @@
+@@ -349,20 +1349,24 @@
  DEV_NET		*pNet;
  SK_AC		*pAC;
  
@@ -34902,7 +34905,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  	}
  	
  } /* FreeResources */
-@@ -371,6 +1372,8 @@
+@@ -371,6 +1375,8 @@
  MODULE_DESCRIPTION("SysKonnect SK-NET Gigabit Ethernet SK-98xx driver");
  MODULE_LICENSE("GPL");
  
@@ -34911,7 +34914,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  #ifdef LINK_SPEED_A
  static char *Speed_A[SK_MAX_CARD_PARAM] = LINK_SPEED;
  #else
-@@ -452,9 +1455,12 @@
+@@ -452,9 +1458,12 @@
  static int   IntsPerSec[SK_MAX_CARD_PARAM];
  static char *Moderation[SK_MAX_CARD_PARAM];
  static char *ModerationMask[SK_MAX_CARD_PARAM];
@@ -34926,7 +34929,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  module_param_array(Speed_A, charp, NULL, 0);
  module_param_array(Speed_B, charp, NULL, 0);
  module_param_array(AutoNeg_A, charp, NULL, 0);
-@@ -471,9 +1477,138 @@
+@@ -471,9 +1480,138 @@
  /* used for interrupt moderation */
  module_param_array(IntsPerSec, int, NULL, 0);
  module_param_array(Moderation, charp, NULL, 0);
@@ -35067,7 +35070,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  
  /*****************************************************************************
   *
-@@ -491,11 +1626,13 @@
+@@ -491,11 +1629,13 @@
  static int __devinit SkGeBoardInit(struct SK_NET_DEVICE *dev, SK_AC *pAC)
  {
  short	i;
@@ -35082,7 +35085,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  
  	SK_DBG_MSG(NULL, SK_DBGMOD_DRV, SK_DBGCAT_DRV_ENTRY,
  		("IoBase: %08lX\n", (unsigned long)pAC->IoBase));
-@@ -511,21 +1648,30 @@
+@@ -511,21 +1651,30 @@
  		spin_lock_init(&pAC->TxPort[i][0].TxDesRingLock);
  		spin_lock_init(&pAC->RxPort[i].RxDesRingLock);
  	}
@@ -35120,7 +35123,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  	}
  	SkI2cInit(  pAC, pAC->IoBase, SK_INIT_DATA);
  	SkEventInit(pAC, pAC->IoBase, SK_INIT_DATA);
-@@ -533,21 +1679,28 @@
+@@ -533,21 +1682,28 @@
  	SkAddrInit( pAC, pAC->IoBase, SK_INIT_DATA);
  	SkRlmtInit( pAC, pAC->IoBase, SK_INIT_DATA);
  	SkTimerInit(pAC, pAC->IoBase, SK_INIT_DATA);
@@ -35154,7 +35157,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  	}
  	SkI2cInit(  pAC, pAC->IoBase, SK_INIT_IO);
  	SkEventInit(pAC, pAC->IoBase, SK_INIT_IO);
-@@ -555,61 +1708,130 @@
+@@ -555,61 +1711,130 @@
  	SkAddrInit( pAC, pAC->IoBase, SK_INIT_IO);
  	SkRlmtInit( pAC, pAC->IoBase, SK_INIT_IO);
  	SkTimerInit(pAC, pAC->IoBase, SK_INIT_IO);
@@ -35313,7 +35316,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  
  	return (0);
  } /* SkGeBoardInit */
-@@ -629,7 +1851,8 @@
+@@ -629,7 +1854,8 @@
   *	SK_TRUE, if all memory could be allocated
   *	SK_FALSE, if not
   */
@@ -35323,7 +35326,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  {
  caddr_t		pDescrMem;	/* pointer to descriptor memory area */
  size_t		AllocLength;	/* length of complete descriptor area */
-@@ -699,16 +1922,20 @@
+@@ -699,16 +1925,20 @@
  
  	SK_DBG_MSG(NULL, SK_DBGMOD_DRV, SK_DBGCAT_DRV_ENTRY,
  		("BoardFreeMem\n"));
@@ -35349,7 +35352,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  } /* BoardFreeMem */
  
  
-@@ -717,12 +1944,13 @@
+@@ -717,12 +1947,13 @@
   * 	BoardInitMem - initiate the descriptor rings
   *
   * Description:
@@ -35365,7 +35368,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  {
  int	i;		/* loop counter */
  int	RxDescrSize;	/* the size of a rx descriptor rounded up to alignment*/
-@@ -731,34 +1959,37 @@
+@@ -731,34 +1962,37 @@
  	SK_DBG_MSG(NULL, SK_DBGMOD_DRV, SK_DBGCAT_DRV_ENTRY,
  		("BoardInitMem\n"));
  
@@ -35427,7 +35430,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  /*****************************************************************************
   *
   * 	SetupRing - create one descriptor ring
-@@ -778,6 +2009,7 @@
+@@ -778,6 +2012,7 @@
  RXD		**ppRingTail,	/* address where the tail should be written */
  RXD		**ppRingPrev,	/* address where the tail should be written */
  int		*pRingFree,	/* address where the # of free descr. goes */
@@ -35435,7 +35438,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  SK_BOOL		IsTx)		/* flag: is this a tx ring */
  {
  int	i;		/* loop counter */
-@@ -810,7 +2042,7 @@
+@@ -810,7 +2045,7 @@
  		/* set the pointers right */
  		pDescr->VNextRxd = VNextDescr & 0xffffffffULL;
  		pDescr->pNextRxd = pNextDescr;
@@ -35444,7 +35447,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  
  		/* advance one step */
  		pPrevDescr = pDescr;
-@@ -820,11 +2052,12 @@
+@@ -820,11 +2055,12 @@
  	}
  	pPrevDescr->pNextRxd = (RXD*) pMemArea;
  	pPrevDescr->VNextRxd = VMemArea;
@@ -35462,7 +35465,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  } /* SetupRing */
  
  
-@@ -882,24 +2115,46 @@
+@@ -882,24 +2118,46 @@
   * Returns: N/A
   *
   */
@@ -35511,7 +35514,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  	while (((IntSrc & IRQ_MASK) & ~SPECIAL_IRQS) != 0) {
  #if 0 /* software irq currently not used */
  		if (IntSrc & IS_IRQ_SW) {
-@@ -913,6 +2168,7 @@
+@@ -913,6 +2171,7 @@
  				SK_DBGCAT_DRV_INT_SRC,
  				("EOF RX1 IRQ\n"));
  			ReceiveIrq(pAC, &pAC->RxPort[0], SK_TRUE);
@@ -35519,7 +35522,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  			SK_PNMI_CNT_RX_INTR(pAC, 0);
  		}
  		if (IntSrc & IS_R2_F) {
-@@ -920,6 +2176,7 @@
+@@ -920,6 +2179,7 @@
  				SK_DBGCAT_DRV_INT_SRC,
  				("EOF RX2 IRQ\n"));
  			ReceiveIrq(pAC, &pAC->RxPort[1], SK_TRUE);
@@ -35527,7 +35530,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  			SK_PNMI_CNT_RX_INTR(pAC, 1);
  		}
  #ifdef USE_TX_COMPLETE /* only if tx complete interrupt used */
-@@ -927,6 +2184,7 @@
+@@ -927,6 +2187,7 @@
  			SK_DBG_MSG(NULL, SK_DBGMOD_DRV,
  				SK_DBGCAT_DRV_INT_SRC,
  				("EOF AS TX1 IRQ\n"));
@@ -35535,7 +35538,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  			SK_PNMI_CNT_TX_INTR(pAC, 0);
  			spin_lock(&pAC->TxPort[0][TX_PRIO_LOW].TxDesRingLock);
  			FreeTxDescriptors(pAC, &pAC->TxPort[0][TX_PRIO_LOW]);
-@@ -936,6 +2194,7 @@
+@@ -936,6 +2197,7 @@
  			SK_DBG_MSG(NULL, SK_DBGMOD_DRV,
  				SK_DBGCAT_DRV_INT_SRC,
  				("EOF AS TX2 IRQ\n"));
@@ -35543,7 +35546,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  			SK_PNMI_CNT_TX_INTR(pAC, 1);
  			spin_lock(&pAC->TxPort[1][TX_PRIO_LOW].TxDesRingLock);
  			FreeTxDescriptors(pAC, &pAC->TxPort[1][TX_PRIO_LOW]);
-@@ -946,38 +2205,42 @@
+@@ -946,38 +2208,42 @@
  			SK_DBG_MSG(NULL, SK_DBGMOD_DRV,
  				SK_DBGCAT_DRV_INT_SRC,
  				("EOF SY TX1 IRQ\n"));
@@ -35599,7 +35602,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  
  	IntSrc &= pAC->GIni.GIValIrqMask;
  	if ((IntSrc & SPECIAL_IRQS) || pAC->CheckQueue) {
-@@ -990,19 +2253,9 @@
+@@ -990,19 +2256,9 @@
  
  		SkEventDispatcher(pAC, pAC->IoBase);
  		spin_unlock(&pAC->SlowPathLock);
@@ -35621,7 +35624,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  
  	if (pAC->CheckQueue) {
  		pAC->CheckQueue = SK_FALSE;
-@@ -1014,7 +2267,8 @@
+@@ -1014,7 +2270,8 @@
  	/* IRQ is processed - Enable IRQs again*/
  	SK_OUT32(pAC->IoBase, B0_IMSK, pAC->GIni.GIValIrqMask);
  
@@ -35631,7 +35634,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  } /* SkGeIsr */
  
  
-@@ -1031,24 +2285,44 @@
+@@ -1031,24 +2288,44 @@
   * Returns: N/A
   *
   */
@@ -35678,7 +35681,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  	while (((IntSrc & IRQ_MASK) & ~SPECIAL_IRQS) != 0) {
  #if 0 /* software irq currently not used */
  		if (IntSrc & IS_IRQ_SW) {
-@@ -1062,6 +2336,7 @@
+@@ -1062,6 +2339,7 @@
  				SK_DBGCAT_DRV_INT_SRC,
  				("EOF RX1 IRQ\n"));
  			ReceiveIrq(pAC, &pAC->RxPort[0], SK_TRUE);
@@ -35686,7 +35689,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  			SK_PNMI_CNT_RX_INTR(pAC, 0);
  		}
  #ifdef USE_TX_COMPLETE /* only if tx complete interrupt used */
-@@ -1069,6 +2344,7 @@
+@@ -1069,6 +2347,7 @@
  			SK_DBG_MSG(NULL, SK_DBGMOD_DRV,
  				SK_DBGCAT_DRV_INT_SRC,
  				("EOF AS TX1 IRQ\n"));
@@ -35694,7 +35697,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  			SK_PNMI_CNT_TX_INTR(pAC, 0);
  			spin_lock(&pAC->TxPort[0][TX_PRIO_LOW].TxDesRingLock);
  			FreeTxDescriptors(pAC, &pAC->TxPort[0][TX_PRIO_LOW]);
-@@ -1079,25 +2355,27 @@
+@@ -1079,25 +2358,27 @@
  			SK_DBG_MSG(NULL, SK_DBGMOD_DRV,
  				SK_DBGCAT_DRV_INT_SRC,
  				("EOF SY TX1 IRQ\n"));
@@ -35730,7 +35733,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  	IntSrc &= pAC->GIni.GIValIrqMask;
  	if ((IntSrc & SPECIAL_IRQS) || pAC->CheckQueue) {
  		SK_DBG_MSG(NULL, SK_DBGMOD_DRV, SK_DBGCAT_DRV_INT_SRC,
-@@ -1109,43 +2387,15 @@
+@@ -1109,43 +2390,15 @@
  
  		SkEventDispatcher(pAC, pAC->IoBase);
  		spin_unlock(&pAC->SlowPathLock);
@@ -35777,7 +35780,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  
  /****************************************************************************
   *
-@@ -1164,27 +2414,55 @@
+@@ -1164,27 +2417,55 @@
   *	!= 0 on error
   */
  static int SkGeOpen(
@@ -35843,7 +35846,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  
  	/* Set blink mode */
  	if ((pAC->PciDev->vendor == 0x1186) || (pAC->PciDev->vendor == 0x11ab ))
-@@ -1193,6 +2471,13 @@
+@@ -1193,6 +2474,13 @@
  	if (pAC->BoardLevel == SK_INIT_DATA) {
  		/* level 1 init common modules here */
  		if (SkGeInit(pAC, pAC->IoBase, SK_INIT_IO) != 0) {
@@ -35857,7 +35860,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  			printk("%s: HWInit (1) failed.\n", pAC->dev[pNet->PortNr]->name);
  			return (-1);
  		}
-@@ -1202,12 +2487,27 @@
+@@ -1202,12 +2490,27 @@
  		SkAddrInit	(pAC, pAC->IoBase, SK_INIT_IO);
  		SkRlmtInit	(pAC, pAC->IoBase, SK_INIT_IO);
  		SkTimerInit	(pAC, pAC->IoBase, SK_INIT_IO);
@@ -35885,7 +35888,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  			printk("%s: HWInit (2) failed.\n", pAC->dev[pNet->PortNr]->name);
  			return (-1);
  		}
-@@ -1217,47 +2517,186 @@
+@@ -1217,47 +2520,186 @@
  		SkAddrInit	(pAC, pAC->IoBase, SK_INIT_RUN);
  		SkRlmtInit	(pAC, pAC->IoBase, SK_INIT_RUN);
  		SkTimerInit	(pAC, pAC->IoBase, SK_INIT_RUN);
@@ -36096,7 +36099,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  
  	SK_DBG_MSG(NULL, SK_DBGMOD_DRV, SK_DBGCAT_DRV_ENTRY,
  		("SkGeOpen suceeded\n"));
-@@ -1278,32 +2717,48 @@
+@@ -1278,32 +2720,48 @@
   *	error code - on error
   */
  static int SkGeClose(
@@ -36158,7 +36161,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  			if (newPtrNet == pNet) {
  				pAC->WasIfUp[0] = SK_FALSE;
  			} else {
-@@ -1314,68 +2769,187 @@
+@@ -1314,68 +2772,187 @@
  			pAC->DiagFlowCtrl = SK_FALSE;
  		}
  	}
@@ -36371,7 +36374,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  	}
  
  	SK_DBG_MSG(NULL, SK_DBGMOD_DRV, SK_DBGCAT_DRV_ENTRY,
-@@ -1386,6 +2960,13 @@
+@@ -1386,6 +2963,13 @@
  			sizeof(SK_PNMI_STRUCT_DATA));
  
  	pAC->MaxPorts--;
@@ -36385,7 +36388,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  
  	return (0);
  } /* SkGeClose */
-@@ -1412,7 +2993,7 @@
+@@ -1412,7 +2996,7 @@
  SK_AC		*pAC;
  int			Rc;	/* return code of XmitFrame */
  
@@ -36394,7 +36397,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  	pAC = pNet->pAC;
  
  	if ((!skb_shinfo(skb)->nr_frags) ||
-@@ -1458,6 +3039,108 @@
+@@ -1458,6 +3042,108 @@
  	return (0);
  } /* SkGeXmit */
  
@@ -36503,7 +36506,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  
  /*****************************************************************************
   *
-@@ -1482,7 +3165,7 @@
+@@ -1482,7 +3168,7 @@
   *	< 0 - on failure: other problems ( -> return failure to upper layers)
   */
  static int XmitFrame(
@@ -36512,7 +36515,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  TX_PORT		*pTxPort,	/* pointer to struct of port to send to */
  struct sk_buff	*pMessage)	/* pointer to send-message              */
  {
-@@ -1490,17 +3173,22 @@
+@@ -1490,17 +3176,22 @@
  	TXD		*pOldTxd;
  	unsigned long	 Flags;
  	SK_U64		 PhysAddr;
@@ -36537,7 +36540,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  		** Maybe free'ing some old one help?
  		*/
  		FreeTxDescriptors(pAC, pTxPort);
-@@ -1527,7 +3215,11 @@
+@@ -1527,7 +3218,11 @@
  	** This is to resolve faulty padding by the HW with 0xaa bytes.
  	*/
  	if (BytesSend < C_LEN_ETHERNET_MINSIZE) {
@@ -36549,7 +36552,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  			spin_unlock_irqrestore(&pTxPort->TxDesRingLock, Flags);
  			return 0;
  		}
-@@ -1561,11 +3253,13 @@
+@@ -1561,11 +3256,13 @@
  	pTxd->VDataHigh = (SK_U32) (PhysAddr >> 32);
  	pTxd->pMBuf     = pMessage;
  
@@ -36567,7 +36570,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  			(pAC->GIni.GIChipRev == 0) &&
  			(pAC->GIni.GIChipId == CHIP_ID_YUKON)) {
  			pTxd->TBControl = BMU_TCP_CHECK;
-@@ -1573,9 +3267,14 @@
+@@ -1573,9 +3270,14 @@
  			pTxd->TBControl = BMU_UDP_CHECK;
  		}
  
@@ -36585,7 +36588,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  
  		pTxd->TBControl |= BMU_OWN | BMU_STF | 
  				   BMU_SW  | BMU_EOF |
-@@ -1583,7 +3282,7 @@
+@@ -1583,7 +3285,7 @@
  				   BMU_IRQ_EOF |
  #endif
  				   pMessage->len;
@@ -36594,7 +36597,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  		pTxd->TBControl = BMU_OWN | BMU_STF | BMU_CHECK | 
  				  BMU_SW  | BMU_EOF |
  #ifdef USE_TX_COMPLETE
-@@ -1638,10 +3337,11 @@
+@@ -1638,10 +3340,11 @@
  	TXD		*pTxdLst;
  	int 	 	 CurrFrag;
  	int		 BytesSend;
@@ -36607,7 +36610,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  
  	spin_lock_irqsave(&pTxPort->TxDesRingLock, Flags);
  #ifndef USE_TX_COMPLETE
-@@ -1664,6 +3364,7 @@
+@@ -1664,6 +3367,7 @@
  	pTxdFst   = pTxd;
  	pTxdLst   = pTxd;
  	BytesSend = 0;
@@ -36615,7 +36618,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  
  	/* 
  	** Map the first fragment (header) into the DMA-space
-@@ -1680,32 +3381,37 @@
+@@ -1680,32 +3384,37 @@
  	/* 
  	** Does the HW need to evaluate checksum for TCP or UDP packets? 
  	*/
@@ -36668,7 +36671,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  
  	pTxd = pTxd->pNextTxd;
  	pTxPort->TxdRingFree--;
-@@ -1729,18 +3435,44 @@
+@@ -1729,18 +3438,44 @@
  		pTxd->VDataHigh = (SK_U32) (PhysAddr >> 32);
  		pTxd->pMBuf     = pMessage;
  		
@@ -36716,7 +36719,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  		}
  		pTxdLst = pTxd;
  		pTxd    = pTxd->pNextTxd;
-@@ -1894,7 +3626,7 @@
+@@ -1894,7 +3629,7 @@
  SK_U16		Length;		/* data fragment length */
  SK_U64		PhysAddr;	/* physical address of a rx buffer */
  
@@ -36725,7 +36728,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  	if (pMsgBlock == NULL) {
  		SK_DBG_MSG(NULL, SK_DBGMOD_DRV,
  			SK_DBGCAT_DRV_ENTRY,
-@@ -1908,12 +3640,12 @@
+@@ -1908,12 +3643,12 @@
  	pRxd = pRxPort->pRxdRingTail;
  	pRxPort->pRxdRingTail = pRxd->pNextRxd;
  	pRxPort->RxdRingFree--;
@@ -36740,7 +36743,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  		PCI_DMA_FROMDEVICE);
  
  	pRxd->VDataLow  = (SK_U32) (PhysAddr & 0xffffffff);
-@@ -1953,7 +3685,7 @@
+@@ -1953,7 +3688,7 @@
  	pRxd = pRxPort->pRxdRingTail;
  	pRxPort->pRxdRingTail = pRxd->pNextRxd;
  	pRxPort->RxdRingFree--;
@@ -36749,7 +36752,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  
  	pRxd->VDataLow  = PhysLow;
  	pRxd->VDataHigh = PhysHigh;
-@@ -1978,28 +3710,40 @@
+@@ -1978,28 +3713,40 @@
   * Returns:	N/A
   */
  static void ReceiveIrq(
@@ -36812,7 +36815,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  
  rx_start:	
  	/* do forever; exit if BMU_OWN found */
-@@ -2021,6 +3765,13 @@
+@@ -2021,6 +3768,13 @@
  
  		Control = pRxd->RBControl;
  	
@@ -36826,7 +36829,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  		/* check if this descriptor is ready */
  		if ((Control & BMU_OWN) != 0) {
  			/* this descriptor is not yet ready */
-@@ -2029,11 +3780,10 @@
+@@ -2029,11 +3783,10 @@
  			FillRxRing(pAC, pRxPort);
  			return;
  		}
@@ -36839,7 +36842,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  			goto rx_failed;
  		}
  
-@@ -2048,8 +3798,8 @@
+@@ -2048,8 +3801,8 @@
  		FrameStat = pRxd->FrameStat;
  
  		/* check for frame length mismatch */
@@ -36850,7 +36853,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  		if (pAC->GIni.GIChipId == CHIP_ID_GENESIS) {
  			if (FrameLength != (SK_U32) (FrameStat >> XMR_FS_LEN_SHIFT)) {
  				SK_DBG_MSG(NULL, SK_DBGMOD_DRV,
-@@ -2059,8 +3809,7 @@
+@@ -2059,8 +3812,7 @@
  					(SK_U32) (FrameStat >> XMR_FS_LEN_SHIFT)));
  				goto rx_failed;
  			}
@@ -36860,7 +36863,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  			if (FrameLength != (SK_U32) (FrameStat >> GMR_FS_LEN_SHIFT)) {
  				SK_DBG_MSG(NULL, SK_DBGMOD_DRV,
  					SK_DBGCAT_DRV_RX_PROGRESS,
-@@ -2093,9 +3842,6 @@
+@@ -2093,9 +3845,6 @@
  /* DumpMsg(pMsg, "Rx");	*/
  
  		if ((Control & BMU_STAT_VAL) != BMU_STAT_VAL || (IsBadFrame)) {
@@ -36870,7 +36873,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  			/* there is a receive error in this frame */
  			SK_DBG_MSG(NULL, SK_DBGMOD_DRV,
  				SK_DBGCAT_DRV_RX_PROGRESS,
-@@ -2103,6 +3849,20 @@
+@@ -2103,6 +3852,20 @@
  				"Control: %x\nRxStat: %x\n",
  				Control, FrameStat));
  
@@ -36891,7 +36894,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  			ReQueueRxBuffer(pAC, pRxPort, pMsg,
  				pRxd->VDataHigh, pRxd->VDataLow);
  
-@@ -2122,95 +3882,117 @@
+@@ -2122,95 +3885,117 @@
  			skb_put(pNewMsg, FrameLength);
  			PhysAddr = ((SK_U64) pRxd->VDataHigh) << (SK_U64)32;
  			PhysAddr |= (SK_U64) pRxd->VDataLow;
@@ -37066,7 +37069,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  			pRlmtMbuf = SkDrvAllocRlmtMbuf(pAC,
  				pAC->IoBase, FrameLength);
  			if (pRlmtMbuf != NULL) {
-@@ -2238,31 +4020,26 @@
+@@ -2238,31 +4023,26 @@
  				}
  
  				SK_DBG_MSG(NULL, SK_DBGMOD_DRV,
@@ -37110,7 +37113,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  	return;
  
  rx_failed:
-@@ -2276,58 +4053,15 @@
+@@ -2276,58 +4056,15 @@
  	PhysAddr |= (SK_U64) pRxd->VDataLow;
  	pci_unmap_page(pAC->PciDev,
  			 PhysAddr,
@@ -37175,7 +37178,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  
  /*****************************************************************************
   *
-@@ -2359,7 +4093,7 @@
+@@ -2359,7 +4096,7 @@
  			PhysAddr |= (SK_U64) pRxd->VDataLow;
  			pci_unmap_page(pAC->PciDev,
  					 PhysAddr,
@@ -37184,7 +37187,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  					 PCI_DMA_FROMDEVICE);
  			DEV_KFREE_SKB(pRxd->pMBuf);
  			pRxd->pMBuf = NULL;
-@@ -2417,31 +4151,32 @@
+@@ -2417,31 +4154,32 @@
  static int SkGeSetMacAddr(struct SK_NET_DEVICE *dev, void *p)
  {
  
@@ -37224,7 +37227,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  	return 0;
  } /* SkGeSetMacAddr */
  
-@@ -2474,7 +4209,7 @@
+@@ -2474,7 +4212,7 @@
  	SK_DBG_MSG(NULL, SK_DBGMOD_DRV, SK_DBGCAT_DRV_ENTRY,
  		("SkGeSetRxMode starts now... "));
  
@@ -37233,7 +37236,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  	pAC = pNet->pAC;
  	if (pAC->RlmtNets == 1)
  		PortIdx = pAC->ActivePort;
-@@ -2523,6 +4258,45 @@
+@@ -2523,6 +4261,45 @@
  
  /*****************************************************************************
   *
@@ -37279,7 +37282,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
   * 	SkGeChangeMtu - set the MTU to another value
   *
   * Description:
-@@ -2536,28 +4310,33 @@
+@@ -2536,28 +4313,33 @@
   */
  static int SkGeChangeMtu(struct SK_NET_DEVICE *dev, int NewMtu)
  {
@@ -37322,7 +37325,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  	if (pAC->DiagModeActive == DIAG_ACTIVE) {
  		if (pAC->DiagFlowCtrl == SK_FALSE) {
  			return -1; /* still in use, deny any actions of MTU */
-@@ -2565,201 +4344,91 @@
+@@ -2565,201 +4347,91 @@
  			pAC->DiagFlowCtrl = SK_FALSE;
  		}
  	}
@@ -37583,7 +37586,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  
  
  /*****************************************************************************
-@@ -2775,125 +4444,67 @@
+@@ -2775,125 +4447,67 @@
   */
  static struct net_device_stats *SkGeStats(struct SK_NET_DEVICE *dev)
  {
@@ -37762,7 +37765,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  /*****************************************************************************
   *
   * 	SkGeIoctl - IO-control function
-@@ -2901,41 +4512,62 @@
+@@ -2901,41 +4515,62 @@
   * Description:
   *	This function is called if an ioctl is issued on the device.
   *	There are three subfunction for reading, writing and test-writing
@@ -37846,7 +37849,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  		if (!capable(CAP_NET_ADMIN)) return -EPERM;
   	case SK_IOCTL_GETMIB:
  		if(copy_from_user(&pAC->PnmiStruct, Ioctl.pData,
-@@ -2962,6 +4594,7 @@
+@@ -2962,6 +4597,7 @@
  		if (NULL == (pMemBuf = kmalloc(Length, GFP_KERNEL))) {
  			return -ENOMEM;
  		}
@@ -37854,7 +37857,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  		if(copy_from_user(pMemBuf, Ioctl.pData, Length)) {
  			Err = -EFAULT;
  			goto fault_gen;
-@@ -2980,10 +4613,10 @@
+@@ -2980,10 +4616,10 @@
  			goto fault_gen;
  		}
  fault_gen:
@@ -37867,7 +37870,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  		if (!capable(CAP_NET_ADMIN)) return -EPERM;
  		if (Ioctl.Len < (sizeof(pAC->PnmiStruct) + HeaderLength)) {
  			Length = Ioctl.Len;
-@@ -3008,6 +4641,7 @@
+@@ -3008,6 +4644,7 @@
  		* ((SK_U32 *)pMemBuf) = 0;
  		* ((SK_U32 *)pMemBuf + 1) = pdev->bus->number;
  		* ((SK_U32 *)pMemBuf + 2) = ParseDeviceNbrFromSlotName(pci_name(pdev));
@@ -37875,7 +37878,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  		if(copy_to_user(Ioctl.pData, pMemBuf, Length) ) {
  			Err = -EFAULT;
  			goto fault_diag;
-@@ -3020,6 +4654,91 @@
+@@ -3020,6 +4657,91 @@
  fault_diag:
  		kfree(pMemBuf); /* cleanup everything */
  		break;
@@ -37967,7 +37970,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  #endif
  	default:
  		Err = -EOPNOTSUPP;
-@@ -3052,12 +4771,12 @@
+@@ -3052,12 +4774,12 @@
  unsigned int	Size,	/* length of ioctl data */
  int		mode)	/* flag for set/preset */
  {
@@ -37983,7 +37986,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  	/* access MIB */
  	spin_lock_irqsave(&pAC->SlowPathLock, Flags);
  	switch(mode) {
-@@ -3100,17 +4819,18 @@
+@@ -3100,17 +4822,18 @@
  SK_I32	Port;		/* preferred port */
  SK_BOOL	AutoSet;
  SK_BOOL DupSet;
@@ -38013,7 +38016,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  /*
   *	The two parameters AutoNeg. and DuplexCap. map to one configuration
   *	parameter. The mapping is described by this table:
-@@ -3128,6 +4848,15 @@
+@@ -3128,6 +4851,15 @@
  		  {SK_LMODE_AUTOBOTH , SK_LMODE_AUTOFULL , SK_LMODE_AUTOHALF },
  		  {SK_LMODE_AUTOSENSE, SK_LMODE_AUTOSENSE, SK_LMODE_AUTOSENSE} };
  
@@ -38029,7 +38032,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  #define DC_BOTH	0
  #define DC_FULL 1
  #define DC_HALF 2
-@@ -3160,6 +4889,7 @@
+@@ -3160,6 +4892,7 @@
  	** ConType   DupCap   AutoNeg   FlowCtrl      Role      Speed
  	** -------   ------   -------   --------   ----------   -----
  	**  Auto      Both      On      SymOrRem      Auto       Auto
@@ -38037,7 +38040,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  	**  100FD     Full      Off       None      <ignored>    100
  	**  100HD     Half      Off       None      <ignored>    100
  	**  10FD      Full      Off       None      <ignored>    10
-@@ -3167,66 +4897,86 @@
+@@ -3167,66 +4900,86 @@
  	** 
  	** This ConType parameter is used for all ports of the adapter!
  	*/
@@ -38145,7 +38148,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  	    IsConTypeDefined = SK_FALSE; /* No ConType defined */
  	}
  
-@@ -3245,14 +4995,32 @@
+@@ -3245,14 +4998,32 @@
  		} else if (strcmp(Speed_A[pAC->Index],"100")==0) {
  		    LinkSpeed = SK_LSPEED_100MBPS;
  		} else if (strcmp(Speed_A[pAC->Index],"1000")==0) {
@@ -38180,7 +38183,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  	}
  
  	/* 
-@@ -3347,9 +5115,6 @@
+@@ -3347,9 +5118,6 @@
  	}
  	
  	if (!AutoSet && DupSet) {
@@ -38190,7 +38193,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  		AutoNeg = AN_ON;
  	}
  	
-@@ -3377,7 +5142,7 @@
+@@ -3377,7 +5145,7 @@
  		    FlowCtrl = SK_FLOW_MODE_NONE;
  		} else {
  		    printk("sk98lin: Illegal value \"%s\" for FlowCtrl_A\n",
@@ -38199,7 +38202,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  		    IsFlowCtrlDefined = SK_FALSE;
  		}
  	} else {
-@@ -3469,7 +5234,7 @@
+@@ -3469,7 +5237,7 @@
  	** Decide whether to set new config value if somethig valid has
  	** been received.
  	*/
@@ -38208,7 +38211,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  	    pAC->GIni.GP[1].PLinkSpeed = LinkSpeed;
  	}
  
-@@ -3545,9 +5310,6 @@
+@@ -3545,9 +5313,6 @@
  	}
  	
  	if (!AutoSet && DupSet) {
@@ -38218,7 +38221,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  		AutoNeg = AN_ON;
  	}
  
-@@ -3660,11 +5422,15 @@
+@@ -3660,11 +5425,15 @@
  	}
  
  	pAC->RlmtNets = 1;
@@ -38235,7 +38238,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  		} else if (strcmp(RlmtMode[pAC->Index], "CheckLinkState") == 0) {
  			pAC->RlmtMode = SK_RLMT_CHECK_LINK;
  		} else if (strcmp(RlmtMode[pAC->Index], "CheckLocalPort") == 0) {
-@@ -3685,12 +5451,66 @@
+@@ -3685,12 +5454,66 @@
  			pAC->RlmtMode = 0;
  		}
  	} else {
@@ -38304,7 +38307,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  	if (Moderation[pAC->Index] != NULL) {
  		if (strcmp(Moderation[pAC->Index], "") == 0) {
  			pAC->DynIrqModInfo.IntModTypeSelect = C_INT_MOD_NONE;
-@@ -3704,70 +5524,49 @@
+@@ -3704,70 +5527,49 @@
  	   		printk("sk98lin: Illegal value \"%s\" for Moderation.\n"
  				"      Disable interrupt moderation.\n",
  				Moderation[pAC->Index]);
@@ -38401,7 +38404,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  	if (IntsPerSec[pAC->Index] != 0) {
  		if ((IntsPerSec[pAC->Index]< C_INT_MOD_IPS_LOWER_RANGE) || 
  			(IntsPerSec[pAC->Index] > C_INT_MOD_IPS_UPPER_RANGE)) {
-@@ -3776,28 +5575,25 @@
+@@ -3776,28 +5578,25 @@
  				IntsPerSec[pAC->Index],
  				C_INT_MOD_IPS_LOWER_RANGE,
  				C_INT_MOD_IPS_UPPER_RANGE,
@@ -38436,7 +38439,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  
  } /* GetConfiguration */
  
-@@ -3812,62 +5608,23 @@
+@@ -3812,62 +5611,23 @@
   *
   * Returns: N/A
   */
@@ -38510,7 +38513,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  /****************************************************************************/
  /* functions for common modules *********************************************/
  /****************************************************************************/
-@@ -3956,7 +5713,9 @@
+@@ -3956,7 +5716,9 @@
  SK_U64 SkOsGetTime(SK_AC *pAC)
  {
  	SK_U64	PrivateJiffies;
@@ -38520,7 +38523,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  	return PrivateJiffies;
  } /* SkOsGetTime */
  
-@@ -4029,6 +5788,28 @@
+@@ -4029,6 +5791,28 @@
  
  /*****************************************************************************
   *
@@ -38549,7 +38552,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
   *	SkPciWriteCfgWord - write a 16 bit value to pci config space
   *
   * Description:
-@@ -4089,29 +5870,27 @@
+@@ -4089,29 +5873,27 @@
   *	
   */
  int SkDrvEvent(
@@ -38598,7 +38601,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  	case SK_DRV_PORT_FAIL:
  		FromPort = Param.Para32[0];
  		SK_DBG_MSG(NULL, SK_DBGMOD_DRV, SK_DBGCAT_DRV_EVENT,
-@@ -4121,210 +5900,313 @@
+@@ -4121,210 +5903,313 @@
  		} else {
  			printk("%s: Port B failed.\n", pAC->dev[1]->name);
  		}
@@ -39048,7 +39051,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  		/* tschilling: New common function with minimum size check. */
  		DualNet = SK_FALSE;
  		if (pAC->RlmtNets == 2) {
-@@ -4342,74 +6224,316 @@
+@@ -4342,74 +6227,316 @@
  			printk("SkGeInitAssignRamToQueues failed.\n");
  			break;
  		}
@@ -39407,7 +39410,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  
  
  /*****************************************************************************
-@@ -4454,14 +6578,22 @@
+@@ -4454,14 +6581,22 @@
  	case SK_ERRCL_COMM:
  		strcpy(ClassStr, "Communication error");
  		break;
@@ -39435,7 +39438,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  
  /*****************************************************************************
   *
-@@ -4477,8 +6609,11 @@
+@@ -4477,8 +6612,11 @@
  int SkDrvEnterDiagMode(
  SK_AC   *pAc)   /* pointer to adapter context */
  {
@@ -39449,7 +39452,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  
  	SK_MEMCPY(&(pAc->PnmiBackup), &(pAc->PnmiStruct), 
  			sizeof(SK_PNMI_STRUCT_DATA));
-@@ -4493,8 +6628,9 @@
+@@ -4493,8 +6631,9 @@
  		} else {
  			pAC->WasIfUp[0] = SK_FALSE;
  		}
@@ -39461,7 +39464,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  			if (netif_running(pAC->dev[1])) {
  				pAC->WasIfUp[1] = SK_TRUE;
  				pAC->DiagFlowCtrl = SK_TRUE; /* for SkGeClose */
-@@ -4527,16 +6663,16 @@
+@@ -4527,16 +6666,16 @@
  			sizeof(SK_PNMI_STRUCT_DATA));
  	pAc->DiagModeActive    = DIAG_NOTACTIVE;
  	pAc->Pnmi.DiagAttached = SK_DIAG_IDLE;
@@ -39486,7 +39489,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  	return(0);
  }
  
-@@ -4616,11 +6752,20 @@
+@@ -4616,11 +6755,20 @@
  
  	dev = pAC->dev[devNbr];
  
@@ -39510,7 +39513,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  		return (-1);
  	}
  	return (0);
-@@ -4649,6 +6794,17 @@
+@@ -4649,6 +6797,17 @@
  
  	if (SkGeOpen(dev) != 0) {
  		return (-1);
@@ -39528,7 +39531,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  	}
  
  	/*
-@@ -4661,14 +6817,29 @@
+@@ -4661,14 +6820,29 @@
  
  } /* SkDrvInitAdapter */
  
@@ -39559,7 +39562,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  /*****************************************************************************
   *
   *	DumpMsg - print a frame
-@@ -4679,9 +6850,11 @@
+@@ -4679,9 +6853,11 @@
   * Returns: N/A
   *	
   */
@@ -39573,7 +39576,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  
  	if (skb == NULL) {
  		printk("DumpMsg(): NULL-Message\n");
-@@ -4693,19 +6866,14 @@
+@@ -4693,19 +6869,14 @@
  		return;
  	}
  
@@ -39597,7 +39600,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  /*****************************************************************************
   *
   *	DumpData - print a data area
-@@ -4717,23 +6885,22 @@
+@@ -4717,23 +6888,22 @@
   * Returns: N/A
   *	
   */
@@ -39634,7 +39637,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  		addr++;
  		asc_buffer[addr] = 0;
  		hex_buffer[haddr] = HEXCHAR[(*p & 0xf0) >> 4];
-@@ -4759,27 +6926,23 @@
+@@ -4759,27 +6929,23 @@
   *	DumpLong - print a data area as long values
   *
   * Description:
@@ -39674,7 +39677,7 @@ diff -urN linux-2.6.24.orig/drivers/net/sk98lin/skge.c linux-2.6.24/drivers/net/
  	for (i=0; i < size; ) {
  		l = (long) *p;
  		hex_buffer[haddr] = HEXCHAR[(l >> 28) & 0xf];
-@@ -4813,406 +6976,9 @@
+@@ -4813,406 +6979,9 @@
  
  #endif
  

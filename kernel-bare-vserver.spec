@@ -42,7 +42,7 @@
 
 %define		_basever	2.6.22
 %define		_postver	.19
-%define		_rel		2
+%define		_rel		3
 
 # for rc kernels basever is the version patch (source1) should be applied to
 #%define		_ver		2.6.20

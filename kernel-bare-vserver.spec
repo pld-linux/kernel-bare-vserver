@@ -40,9 +40,9 @@
 
 %define		alt_kernel	bare-vserver
 
-%define		_basever	2.6.22
-%define		_postver	.19
-%define		_rel		3
+%define		_basever	2.6.24
+%define		_postver	.4
+%define		_rel		0.1
 
 # for rc kernels basever is the version patch (source1) should be applied to
 #%define		_ver		2.6.20
@@ -62,10 +62,10 @@ Epoch:		3
 License:	GPL v2
 Group:		Base/Kernel
 Source0:	http://www.kernel.org/pub/linux/kernel/v2.6/linux-%{_basever}.tar.bz2
-# Source0-md5:	2e230d005c002fb3d38a3ca07c0200d0
+# Source0-md5:	3f23ad4b69d0a552042d1ed0f4399857
 %if "%{_postver}" != "%{nil}"
 Source1:	http://www.kernel.org/pub/linux/kernel/v2.6/patch-%{_basever}%{_postver}.bz2
-# Source1-md5:	066cc3bdd2783dcd01f6ff466e449ec0
+# Source1-md5:	508f5aaa99dead9836ff490496a61581
 %endif
 %if "%{_ver}" != "%{nil}"
 Source10:	http://www.kernel.org/pub/linux/kernel/v2.6/testing/patch-%{_ver}-%{_rc}.bz2
@@ -83,10 +83,10 @@ Source21:	kernel-bare-vserver-x86_64.config
 Patch100:	linux-2.6-vs2.3.patch
 # minimal grsecurity for vserver patched kernel
 Patch101:	linux-2.6-grsec-vs-minimal.patch
-# from squashfs: http://dl.sourceforge.net/sourceforge/squashfs/squashfs3.3.tar.gz for linux-2.6.22
-Patch102:	linux-2.6.22-squashfs.patch
-# official vendor driver for Marvell Yukon gigabit adapters, v10.22.4.3
-Patch103:	linux-2.6.22-sk98lin.patch
+# from squashfs: http://dl.sourceforge.net/sourceforge/squashfs/squashfs3.3.tar.gz
+Patch102:	linux-2.6.24-squashfs.patch
+# official vendor driver for Marvell Yukon gigabit adapters, v10.50.1.3
+Patch103:	linux-2.6.24-sk98lin.patch
 
 URL:		http://www.kernel.org/
 BuildRequires:	binutils >= 3:2.14.90.0.7

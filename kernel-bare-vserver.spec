@@ -7,10 +7,6 @@
 
 %{?debug:%define with_verbose 1}
 
-%ifnarch %{ix86}
-%undefine	with_pae
-%endif
-
 %ifarch %{ix86}
 %define		have_isa	1
 %endif

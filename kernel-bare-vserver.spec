@@ -13,26 +13,7 @@
 
 %define		have_pcmcia	1
 %define		have_oss	1
-
 %define		have_sound	1
-
-## Program required by kernel to work.
-%define		_binutils_ver		2.12.1
-%define		_util_linux_ver		2.10o
-%define		_module_init_tool_ver	0.9.10
-%define		_e2fsprogs_ver		1.29
-%define		_jfsutils_ver		1.1.3
-%define		_reiserfsprogs_ver	3.6.3
-%define		_xfsprogs_ver		2.6.0
-%define		_pcmcia_cs_ver		3.1.21
-%define		_pcmciautils_ver	004
-%define		_quota_tools_ver	3.09
-%define		_ppp_ver		1:2.4.0
-%define		_isdn4k_utils_ver	3.1pre1
-%define		_nfs_utils_ver		1.0.5
-%define		_procps_ver		3.2.0
-%define		_oprofile_ver		0.9
-%define		_udev_ver		071
 
 %define		alt_kernel	bare-vserver
 
@@ -106,19 +87,19 @@ Provides:	kernel-net-ieee80211
 Provides:	kernel-net-ipw2100 = 1.1.3
 Provides:	kernel-net-ipw2200 = 1.0.8
 Provides:	module-info
-Conflicts:	e2fsprogs < %{_e2fsprogs_ver}
-Conflicts:	isdn4k-utils < %{_isdn4k_utils_ver}
-Conflicts:	jfsutils < %{_jfsutils_ver}
-Conflicts:	module-init-tool < %{_module_init_tool_ver}
-Conflicts:	nfs-utils < %{_nfs_utils_ver}
-Conflicts:	oprofile < %{_oprofile_ver}
-Conflicts:	ppp < %{_ppp_ver}
-Conflicts:	procps < %{_procps_ver}
-Conflicts:	quota-tools < %{_quota_tools_ver}
-Conflicts:	reiserfsprogs < %{_reiserfsprogs_ver}
-Conflicts:	udev < %{_udev_ver}
-Conflicts:	util-linux < %{_util_linux_ver}
-Conflicts:	xfsprogs < %{_xfsprogs_ver}
+Conflicts:	e2fsprogs < 1.29
+Conflicts:	isdn4k-utils < 3.1pre1
+Conflicts:	jfsutils < 1.1.3
+Conflicts:	module-init-tool < 0.9.10
+Conflicts:	nfs-utils < 1.0.5
+Conflicts:	oprofile < 0.9
+Conflicts:	ppp < 1:2.4.0
+Conflicts:	procps < 3.2.0
+Conflicts:	quota-tools < 3.09
+Conflicts:	reiserfsprogs < 3.6.3
+Conflicts:	udev < 1:071
+Conflicts:	util-linux < 2.10o
+Conflicts:	xfsprogs < 2.6.0
 ExclusiveArch:	%{ix86} %{x8664}
 ExclusiveOS:	Linux
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
@@ -228,8 +209,8 @@ Requires(postun):	%{name}-up = %{epoch}:%{version}-%{release}
 Requires:	%{name}-up = %{epoch}:%{version}-%{release}
 Provides:	kernel(pcmcia)
 Provides:	kernel-pcmcia = %{pcmcia_version}
-Conflicts:	pcmcia-cs < %{_pcmcia_cs_ver}
-Conflicts:	pcmciautils < %{_pcmciautils_ver}
+Conflicts:	pcmcia-cs < 3.1.21
+Conflicts:	pcmciautils < 004
 Autoreqprov:	no
 
 %description pcmcia

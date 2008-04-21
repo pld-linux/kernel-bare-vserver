@@ -104,6 +104,7 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 # No ELF objects there to strip (skips processing 27k files)
 %define		_noautostrip	.*%{_kernelsrcdir}/.*
 
+%define		x86_target_base_arch	x86
 %define		initrd_dir	/boot
 
 # kernel release (used in filesystem and eventually in uname -r)
@@ -374,6 +375,11 @@ sed -i 's#EXTRAVERSION =.*#EXTRAVERSION = %{_postver}-%{alt_kernel}#g' Makefile
 
 sed -i -e '/select INPUT/d' net/bluetooth/hidp/Kconfig
 
+# Kill creating obsolete arch/{i386,x86_64}/boot directories
+# and bzImage symlinks, breaks rpm directory deps
+sed -i -e '/\/arch\/i386\/boot/d' arch/x86/Makefile_32
+sed -i -e '/\/arch\/x86_64\/boot/d' arch/x86/Makefile_64
+
 # remove unwanted files after patching (if any)
 find . '(' -name '*~' -o -name '*.orig' -o -name '.gitignore' ')' -print0 | xargs -0 -r -l512 rm -f
 
@@ -420,7 +426,7 @@ rm -f .config
 BuildConfig() {
 	%{?debug:set -x}
 %ifarch %{ix86}
-	Config="x86"
+	Config="%{x86_target_base_arch}"
 %else
 	Config="%{_target_base_arch}"
 %endif
@@ -445,7 +451,7 @@ BuildConfig() {
 %{?debug:sed -i "s:# CONFIG_DEBUG_PREEMPT is not set:CONFIG_DEBUG_PREEMPT=y:" .config}
 %{?debug:sed -i "s:# CONFIG_RT_DEADLOCK_DETECT is not set:CONFIG_RT_DEADLOCK_DETECT=y:" .config}
 
-	install .config arch/%{_target_base_arch}/defconfig
+	install .config arch/%{x86_target_base_arch}/defconfig
 	install -d $KERNEL_INSTALL_DIR%{_kernelsrcdir}/include/linux
 	rm -f include/linux/autoconf.h
 	%{__make} %{MakeOpts} include/linux/autoconf.h
@@ -453,7 +459,7 @@ BuildConfig() {
 		$KERNEL_INSTALL_DIR%{_kernelsrcdir}/include/linux/autoconf-dist.h
 	install .config \
 		$KERNEL_INSTALL_DIR%{_kernelsrcdir}/config-dist
-	install .config arch/%{_target_base_arch}/defconfig
+	install .config arch/%{x86_target_base_arch}/defconfig
 }
 
 BuildKernel() {
@@ -461,7 +467,7 @@ BuildKernel() {
 	echo "Building kernel ..."
 	%{__make} %{MakeOpts} mrproper \
 		RCS_FIND_IGNORE='-name build-done -prune -o'
-	install arch/%{_target_base_arch}/defconfig .config
+	install arch/%{x86_target_base_arch}/defconfig .config
 
 	%{__make} %{MakeOpts} clean \
 		RCS_FIND_IGNORE='-name build-done -prune -o'
@@ -475,7 +481,7 @@ BuildKernel() {
 
 PreInstallKernel() {
 %ifarch %{ix86}
-	Config="x86"
+	Config="%{x86_target_base_arch}"
 %else
 	Config="%{_target_base_arch}"
 %endif
@@ -484,7 +490,7 @@ PreInstallKernel() {
 	mkdir -p $KERNEL_INSTALL_DIR/boot
 	install System.map $KERNEL_INSTALL_DIR/boot/System.map-$KernelVer
 %ifarch %{ix86} %{x8664}
-	install arch/%{_target_base_arch}/boot/bzImage $KERNEL_INSTALL_DIR/boot/vmlinuz-$KernelVer
+	install arch/%{x86_target_base_arch}/boot/bzImage $KERNEL_INSTALL_DIR/boot/vmlinuz-$KernelVer
 %endif
 
 	install vmlinux $KERNEL_INSTALL_DIR/boot/vmlinux-$KernelVer
@@ -665,7 +671,6 @@ fi
 /lib/modules/%{kernel_release}/kernel/kernel
 /lib/modules/%{kernel_release}/kernel/lib
 /lib/modules/%{kernel_release}/kernel/net
-/lib/modules/%{kernel_release}/kernel/security
 %dir /lib/modules/%{kernel_release}/kernel/sound
 /lib/modules/%{kernel_release}/kernel/sound/soundcore.*
 %if %{have_sound}
@@ -783,6 +788,7 @@ fi
 %{_kernelsrcdir}/lib
 %{_kernelsrcdir}/mm
 %{_kernelsrcdir}/net
+%{_kernelsrcdir}/samples
 %{_kernelsrcdir}/scripts/*
 %exclude %{_kernelsrcdir}/scripts/Kbuild.include
 %exclude %{_kernelsrcdir}/scripts/Makefile*

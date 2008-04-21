@@ -375,11 +375,6 @@ sed -i 's#EXTRAVERSION =.*#EXTRAVERSION = %{_postver}-%{alt_kernel}#g' Makefile
 
 sed -i -e '/select INPUT/d' net/bluetooth/hidp/Kconfig
 
-# Kill creating obsolete arch/{i386,x86_64}/boot directories
-# and bzImage symlinks, breaks rpm directory deps
-sed -i -e '/\/arch\/i386\/boot/d' arch/x86/Makefile_32
-sed -i -e '/\/arch\/x86_64\/boot/d' arch/x86/Makefile_64
-
 # remove unwanted files after patching (if any)
 find . '(' -name '*~' -o -name '*.orig' -o -name '.gitignore' ')' -print0 | xargs -0 -r -l512 rm -f
 
@@ -490,7 +485,7 @@ PreInstallKernel() {
 	mkdir -p $KERNEL_INSTALL_DIR/boot
 	install System.map $KERNEL_INSTALL_DIR/boot/System.map-$KernelVer
 %ifarch %{ix86} %{x8664}
-	install arch/%{x86_target_base_arch}/boot/bzImage $KERNEL_INSTALL_DIR/boot/vmlinuz-$KernelVer
+	install arch/x86/boot/bzImage $KERNEL_INSTALL_DIR/boot/vmlinuz-$KernelVer
 %endif
 
 	install vmlinux $KERNEL_INSTALL_DIR/boot/vmlinux-$KernelVer
@@ -552,7 +547,7 @@ find . -maxdepth 1 ! -name "build-done" ! -name "." -exec cp -a$l "{}" "$RPM_BUI
 
 cd $RPM_BUILD_ROOT%{_kernelsrcdir}
 
-%{__make} %{MakeOpts} mrproper \
+%{__make} %{MakeOpts} mrproper archclean \
 	RCS_FIND_IGNORE='-name build-done -prune -o'
 
 find '(' -name '*~' -o -name '*.orig' ')' -print0 | xargs -0 -r -l512 rm -f

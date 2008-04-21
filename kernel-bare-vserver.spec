@@ -21,12 +21,10 @@
 %define		_postver	.5
 %define		_rel		1
 
-# for rc kernels basever is the version patch (source1) should be applied to
 #%define		_ver		2.6.20
-#%define		_rc			rc4
-# for non rc-kernels these should be %{nil}
+#%define		_rc		rc4
 %define		_ver		%{nil}
-%define		_rc			%{nil}
+%define		_rc		%{nil}
 
 Summary:	The Linux kernel (the core of the Linux operating system)
 Summary(de):	Der Linux-Kernel (Kern des Linux-Betriebssystems)
@@ -62,14 +60,13 @@ Patch100:	linux-2.6-vs2.3.patch
 Patch101:	linux-2.6-grsec-vs-minimal.patch
 # from squashfs: http://dl.sourceforge.net/sourceforge/squashfs/squashfs3.3.tar.gz
 Patch102:	linux-2.6.24-squashfs.patch
-# official vendor driver for Marvell Yukon gigabit adapters, v10.50.1.3
+# official vendor driver for Marvell Yukon gigabit adapters
 Patch103:	linux-2.6.24-sk98lin.patch
 
 URL:		http://www.kernel.org/
 BuildRequires:	binutils >= 3:2.14.90.0.7
 BuildRequires:	gcc >= 5:3.2
 BuildRequires:	module-init-tools
-# for hostname command
 BuildRequires:	net-tools
 BuildRequires:	perl-base
 BuildRequires:	rpmbuild(macros) >= 1.217
@@ -113,8 +110,8 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 # modules will be looked from /lib/modules/%{kernel_release}
 # _localversion is just that without version for "> localversion"
 %define		_localversion %{release}
-%define		kernel_release %{version}_%{alt_kernel}-%{_localversion}
-%define		_kernelsrcdir	/usr/src/linux-%{version}_%{alt_kernel}
+%define		kernel_release %{version}-%{alt_kernel}-%{_localversion}
+%define		_kernelsrcdir	/usr/src/linux-%{version}-%{alt_kernel}
 
 %define	CommonOpts	HOSTCC="%{__cc}" HOSTCFLAGS="-Wall -Wstrict-prototypes %{rpmcflags} -fomit-frame-pointer"
 %if "%{_target_base_arch}" != "%{_arch}"
@@ -134,7 +131,6 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 %define __features Enabled features:\
 %{?debug: - DEBUG}\
 %define Features %(echo "%{__features}" | sed '/^$/d')
-# vim: "
 
 %description
 This package contains the Linux kernel that is used to boot and run
@@ -374,7 +370,7 @@ Documentation.
 %patch103 -p1
 
 # Fix EXTRAVERSION in main Makefile
-sed -i 's#EXTRAVERSION =.*#EXTRAVERSION = %{_postver}_%{alt_kernel}#g' Makefile
+sed -i 's#EXTRAVERSION =.*#EXTRAVERSION = %{_postver}-%{alt_kernel}#g' Makefile
 
 sed -i -e '/select INPUT/d' net/bluetooth/hidp/Kconfig
 
@@ -593,23 +589,12 @@ if [ -x /sbin/new-kernel-pkg ]; then
 fi
 
 %post
-mv -f /boot/vmlinuz-%{alt_kernel} /boot/vmlinuz-%{alt_kernel}.old 2> /dev/null > /dev/null
-mv -f /boot/System.map-%{alt_kernel} /boot/System.map-%{alt_kernel}.old 2> /dev/null > /dev/null
 ln -sf vmlinuz-%{kernel_release} /boot/vmlinuz-%{alt_kernel}
 ln -sf System.map-%{kernel_release} /boot/System.map-%{alt_kernel}
-if [ ! -e /boot/vmlinuz ]; then
-	mv -f /boot/vmlinuz /boot/vmlinuz.old 2> /dev/null > /dev/null
-	mv -f /boot/System.map /boot/System.map.old 2> /dev/null > /dev/null
-	ln -sf vmlinuz-%{kernel_release} /boot/vmlinuz
-	ln -sf System.map-%{alt_kernel} /boot/System.map
-	mv -f %{initrd_dir}/initrd %{initrd_dir}/initrd.old 2> /dev/null > /dev/null
-	ln -sf initrd-%{alt_kernel} %{initrd_dir}/initrd
-fi
 
 %depmod %{kernel_release}
 
 /sbin/geninitrd -f --initrdfs=rom %{initrd_dir}/initrd-%{kernel_release}.gz %{kernel_release}
-mv -f %{initrd_dir}/initrd-%{alt_kernel} %{initrd_dir}/initrd-%{alt_kernel}.old 2> /dev/null > /dev/null
 ln -sf initrd-%{kernel_release}.gz %{initrd_dir}/initrd-%{alt_kernel}
 
 if [ -x /sbin/new-kernel-pkg ]; then
@@ -627,7 +612,6 @@ elif [ -x /sbin/rc-boot ]; then
 fi
 
 %post vmlinux
-mv -f /boot/vmlinux-%{alt_kernel} /boot/vmlinux-%{alt_kernel}.old 2> /dev/null > /dev/null
 ln -sf vmlinux-%{kernel_release} /boot/vmlinux-%{alt_kernel}
 
 %post drm
@@ -661,7 +645,7 @@ ln -snf %{basename:%{_kernelsrcdir}} %{_prefix}/src/linux-%{alt_kernel}
 %postun headers
 if [ "$1" = "0" ]; then
 	if [ -L %{_prefix}/src/linux-%{alt_kernel} ]; then
-		if [ "$(readlink %{_prefix}/src/linux-%{alt_kernel})" = "linux-%{version}_%{alt_kernel}" ]; then
+		if [ "$(readlink %{_prefix}/src/linux-%{alt_kernel})" = "linux-%{version}-%{alt_kernel}" ]; then
 			rm -f %{_prefix}/src/linux-%{alt_kernel}
 		fi
 	fi
@@ -677,9 +661,6 @@ fi
 /lib/modules/%{kernel_release}/kernel/arch
 /lib/modules/%{kernel_release}/kernel/crypto
 /lib/modules/%{kernel_release}/kernel/drivers
-#%if %{have_oss} && %{have_isa}
-#%exclude /lib/modules/%{kernel_release}/kernel/drivers/media/radio/miropcm20*.ko*
-#%endif
 /lib/modules/%{kernel_release}/kernel/fs
 /lib/modules/%{kernel_release}/kernel/kernel
 /lib/modules/%{kernel_release}/kernel/lib
@@ -751,9 +732,6 @@ fi
 %files sound-oss
 %defattr(644,root,root,755)
 /lib/modules/%{kernel_release}/kernel/sound/oss
-#%if %{have_isa}
-#/lib/modules/%{kernel_release}/kernel/drivers/media/radio/miropcm20*.ko*
-#%endif
 %endif			# %{have_oss}
 %endif			# %{have_sound}
 

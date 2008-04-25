@@ -17,9 +17,9 @@
 
 %define		alt_kernel	bare-vserver
 
-%define		_basever	2.6.24
-%define		_postver	.5
-%define		_rel		1
+%define		_basever	2.6.25
+%define		_postver	%{nil}
+%define		_rel		0.1
 
 #%define		_ver		2.6.20
 #%define		_rc		rc4
@@ -37,7 +37,7 @@ Epoch:		3
 License:	GPL v2
 Group:		Base/Kernel
 Source0:	http://www.kernel.org/pub/linux/kernel/v2.6/linux-%{_basever}.tar.bz2
-# Source0-md5:	3f23ad4b69d0a552042d1ed0f4399857
+# Source0-md5:	db95a49a656a3247d4995a797d333153
 %if "%{_postver}" != "%{nil}"
 Source1:	http://www.kernel.org/pub/linux/kernel/v2.6/patch-%{_basever}%{_postver}.bz2
 # Source1-md5:	e937c732891561f0a34a2e0853df825e
@@ -61,7 +61,7 @@ Patch101:	linux-2.6-grsec-vs-minimal.patch
 # from squashfs: http://dl.sourceforge.net/sourceforge/squashfs/squashfs3.3.tar.gz
 Patch102:	linux-2.6.24-squashfs.patch
 # official vendor driver for Marvell Yukon gigabit adapters
-Patch103:	linux-2.6.24-sk98lin.patch
+Patch103:	linux-2.6.25-sk98lin.patch
 
 URL:		http://www.kernel.org/
 BuildRequires:	binutils >= 3:2.14.90.0.7
@@ -363,7 +363,6 @@ Documentation.
 %if "%{_ver}" != "%{nil}"
 %{__bzip2} -dc %{SOURCE10} | %{__patch} -p1 -s
 %endif
-
 
 %patch100 -p1
 %patch101 -p1

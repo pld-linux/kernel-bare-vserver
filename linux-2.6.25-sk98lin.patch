@@ -32847,7 +32847,7 @@ diff -ruN linux/drivers/net/sk98lin/skge.c linux-new/drivers/net/sk98lin/skge.c
   *	This program is free software; you can redistribute it and/or modify
   *	it under the terms of the GNU General Public License as published by
   *	the Free Software Foundation; either version 2 of the License, or
-@@ -38,86 +32,62 @@
+@@ -38,86 +32,66 @@
  
  /******************************************************************************
   *
@@ -32975,6 +32975,10 @@ diff -ruN linux/drivers/net/sk98lin/skge.c linux-new/drivers/net/sk98lin/skge.c
 +#endif
 +
 +#define ENABLE_FUTURE_ETH
++
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24)
++#define		proc_net	init_net.proc_net
++#endif
  
  /*******************************************************************************
   *
@@ -33201,7 +33205,7 @@ diff -ruN linux/drivers/net/sk98lin/skge.c linux-new/drivers/net/sk98lin/skge.c
  
  #ifdef DEBUG
  static void	DumpMsg(struct sk_buff*, char*);
-@@ -249,33 +263,409 @@
+@@ -249,33 +263,408 @@
  #endif
  
  /* global variables *********************************************************/
@@ -33386,7 +33390,6 @@ diff -ruN linux/drivers/net/sk98lin/skge.c linux-new/drivers/net/sk98lin/skge.c
 +		return -ENODEV;
 +	}
 +
-+	SET_MODULE_OWNER(dev);
 +#ifdef ENABLE_FUTURE_ETH
 +	SET_ETHTOOL_OPS(dev, &sk98lin_ethtool_ops);
 +#endif

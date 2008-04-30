@@ -19,7 +19,7 @@
 
 %define		_basever	2.6.25
 %define		_postver	%{nil}
-%define		_rel		0.1
+%define		_rel		1
 
 #%define		_ver		2.6.20
 #%define		_rc		rc4
@@ -59,7 +59,7 @@ Patch100:	linux-2.6-vs2.3.patch
 # minimal grsecurity for vserver patched kernel
 Patch101:	linux-2.6-grsec-vs-minimal.patch
 # from squashfs: http://dl.sourceforge.net/sourceforge/squashfs/squashfs3.3.tar.gz
-Patch102:	linux-2.6.24-squashfs.patch
+Patch102:	linux-2.6.25-squashfs.patch
 # official vendor driver for Marvell Yukon gigabit adapters
 Patch103:	linux-2.6.25-sk98lin.patch
 

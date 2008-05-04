@@ -590,12 +590,15 @@ if [ -x /sbin/new-kernel-pkg ]; then
 fi
 
 %post
+mv -f /boot/vmlinuz-%{alt_kernel} /boot/vmlinuz-%{alt_kernel}.old 2> /dev/null > /dev/null
 ln -sf vmlinuz-%{kernel_release} /boot/vmlinuz-%{alt_kernel}
+mv -f /boot/System.map-%{alt_kernel} /boot/System.map-%{alt_kernel}.old 2> /dev/null > /dev/null
 ln -sf System.map-%{kernel_release} /boot/System.map-%{alt_kernel}
 
 %depmod %{kernel_release}
 
 /sbin/geninitrd -f --initrdfs=rom %{initrd_dir}/initrd-%{kernel_release}.gz %{kernel_release}
+mv -f %{initrd_dir}/initrd-%{alt_kernel} %{initrd_dir}/initrd-%{alt_kernel}.old 2> /dev/null > /dev/null
 ln -sf initrd-%{kernel_release}.gz %{initrd_dir}/initrd-%{alt_kernel}
 
 if [ -x /sbin/new-kernel-pkg ]; then
@@ -613,6 +616,7 @@ elif [ -x /sbin/rc-boot ]; then
 fi
 
 %post vmlinux
+mv -f /boot/vmlinux-%{alt_kernel} /boot/vmlinux-%{alt_kernel}.old 2> /dev/null > /dev/null
 ln -sf vmlinux-%{kernel_release} /boot/vmlinux-%{alt_kernel}
 
 %post drm

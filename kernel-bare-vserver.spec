@@ -15,11 +15,11 @@
 %define		have_oss	1
 %define		have_sound	1
 
-%define		alt_kernel	bare-vserver
+%define		alt_kernel	bare-vserver%{?with_pae:-pae}
 
 %define		_basever	2.6.25
 %define		_postver	.1
-%define		_rel		1
+%define		_rel		2
 
 #%define		_ver		2.6.20
 #%define		_rc		rc4

@@ -18,7 +18,7 @@
 %define		alt_kernel	bare-vserver%{?with_pae:-pae}
 
 %define		_basever	2.6.25
-%define		_postver	.2
+%define		_postver	.3
 %define		_rel		1
 
 Summary:	The Linux kernel (the core of the Linux operating system)
@@ -35,7 +35,7 @@ Source0:	http://www.kernel.org/pub/linux/kernel/v2.6/linux-%{_basever}.tar.bz2
 # Source0-md5:	db95a49a656a3247d4995a797d333153
 %if "%{_postver}" != "%{nil}"
 Source1:	http://www.kernel.org/pub/linux/kernel/v2.6/patch-%{_basever}%{_postver}.bz2
-# Source1-md5:	c1d1c1542d676ce3143e5713bab2cca4
+# Source1-md5:	49c56cf1394b2286033bb10c7cef7260
 %endif
 
 Source2:	kernel-bare-vserver-module-build.pl

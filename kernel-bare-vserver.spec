@@ -352,7 +352,6 @@ Documentation.
 %patch100 -p1
 %patch101 -p1
 %patch102 -p1
-%patch103 -p1
 
 # Fix EXTRAVERSION in main Makefile
 sed -i 's#EXTRAVERSION =.*#EXTRAVERSION = %{_postver}-%{alt_kernel}#g' Makefile

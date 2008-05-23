@@ -19,7 +19,7 @@
 
 %define		_basever	2.6.25
 %define		_postver	.4
-%define		_rel		2
+%define		_rel		3
 
 Summary:	The Linux kernel (the core of the Linux operating system)
 Summary(de):	Der Linux-Kernel (Kern des Linux-Betriebssystems)

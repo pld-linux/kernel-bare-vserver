@@ -87,6 +87,7 @@ Conflicts:	util-linux < 2.10o
 Conflicts:	xfsprogs < 2.6.0
 %if %{with pae}
 ExclusiveArch:	%{ix86}
+ExcludeArch:	i386 i486 i586
 %else
 ExclusiveArch:	%{ix86} %{x8664}
 %endif

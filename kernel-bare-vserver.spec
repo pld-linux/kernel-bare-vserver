@@ -1,30 +1,40 @@
 #
 # Conditional build:
-%bcond_without	source		# don't build kernel-source package
+%bcond_without	source		# don't build kernel-bare-vserver-source package
+%bcond_without	pcmcia		# don't build pcmcia
 %bcond_with	verbose		# verbose build (V=1)
 %bcond_with	pae		# build PAE (HIGHMEM64G) support on uniprocessor
-%bcond_with	preempt		# build preemptable no realtime kernel
 
 %{?debug:%define with_verbose 1}
 
-%ifarch %{ix86}
-%define		have_isa	1
-%endif
-
-%define		have_pcmcia	1
+%define		have_drm	1
 %define		have_oss	1
 %define		have_sound	1
+%define		have_isa	1
+
+%define		_basever		2.6.25
+%define		_postver		.5
+%define		_rel			2
+
+%define		_enable_debug_packages			0
 
 %define		alt_kernel	bare-vserver%{?with_pae:-pae}
 
-%define		_basever	2.6.25
-%define		_postver	.5
-%define		_rel		1
+# kernel release (used in filesystem and eventually in uname -r)
+# modules will be looked from /lib/modules/%{kernel_release}
+# _localversion is just that without version for "> localversion"
+%define		_localversion %{KABI}
+%define		kernel_release %{version}-%{alt_kernel}-%{_localversion}
+
+# Our Kernel ABI, increase this when you want the out of source modules being rebuilt
+# Usually same as %{_rel}
+%define		KABI		1
 
 Summary:	The Linux kernel (the core of the Linux operating system)
-Summary(de):	Der Linux-Kernel (Kern des Linux-Betriebssystems)
-Summary(fr):	Le Kernel-Linux (La partie centrale du systeme)
-Summary(pl):	J±dro Linuksa
+Summary(de.UTF-8):	Der Linux-Kernel (Kern des Linux-Betriebssystems)
+Summary(et.UTF-8):	Linuxi kernel (ehk operatsioonisÃ¼steemi tuum)
+Summary(fr.UTF-8):	Le Kernel-Linux (La partie centrale du systeme)
+Summary(pl.UTF-8):	JÄ…dro Linuksa
 Name:		kernel-%{alt_kernel}
 Version:	%{_basever}%{_postver}
 Release:	%{_rel}
@@ -34,15 +44,16 @@ Group:		Base/Kernel
 Source0:	http://www.kernel.org/pub/linux/kernel/v2.6/linux-%{_basever}.tar.bz2
 # Source0-md5:	db95a49a656a3247d4995a797d333153
 %if "%{_postver}" != "%{nil}"
-Source1:	http://www.kernel.org/pub/linux/kernel/v2.6/patch-%{_basever}%{_postver}.bz2
+Source1:	http://www.kernel.org/pub/linux/kernel/v2.6/patch-%{version}.bz2
 # Source1-md5:	7aa6fbadb357f92f26c9063ea6a490a4
 %endif
 
-Source2:	kernel-bare-vserver-module-build.pl
+Source2:	kernel-bare-vserver-autoconf.h
 Source3:	kernel-bare-vserver-config.h
+Source4:	kernel-bare-vserver-module-build.pl
 
-Source20:	kernel-bare-vserver-x86.config
-Source21:	kernel-bare-vserver-x86_64.config
+Source10:	kernel-bare-vserver-x86.config
+Source11:	kernel-bare-vserver-x86_64.config
 
 # from http://vserver.13thfloor.at/Experimental/
 Patch100:	linux-2.6-vs2.3.patch
@@ -53,29 +64,32 @@ Patch102:	linux-2.6.25-squashfs.patch
 
 URL:		http://www.kernel.org/
 BuildRequires:	binutils >= 3:2.14.90.0.7
+BuildRequires:	/sbin/depmod
 BuildRequires:	gcc >= 5:3.2
-BuildRequires:	module-init-tools
+# for hostname command
 BuildRequires:	net-tools
 BuildRequires:	perl-base
+BuildRequires:	python
+BuildRequires:	python-modules
 BuildRequires:	rpmbuild(macros) >= 1.217
-BuildRequires:	sed >= 4.0
 Autoreqprov:	no
+Requires(post):	coreutils
+Requires(post):	geninitrd >= 2.57
+Requires(post):	module-init-tools >= 0.9.9
+Requires:	/sbin/depmod
 Requires:	coreutils
 Requires:	geninitrd >= 2.57
 Requires:	module-init-tools >= 0.9.9
-Provides:	%{name}-up = %{epoch}:%{version}-%{release}
-Provides:	kernel = %{epoch}:%{version}-%{release}
-Provides:	kernel(realtime-lsm) = 0.1.1
-Provides:	kernel-misc-fuse
-Provides:	kernel-net-hostap = 0.4.4
-Provides:	kernel-net-ieee80211
-Provides:	kernel-net-ipw2100 = 1.1.3
-Provides:	kernel-net-ipw2200 = 1.0.8
-Provides:	module-info
+Obsoletes:	kernel-misc-fuse
+Obsoletes:	kernel-modules
+Obsoletes:	kernel-net-hostap
+Obsoletes:	kernel-net-ieee80211
+Obsoletes:	kernel-net-ipp2p
+Obsoletes:	kernel-smp
 Conflicts:	e2fsprogs < 1.29
 Conflicts:	isdn4k-utils < 3.1pre1
 Conflicts:	jfsutils < 1.1.3
-Conflicts:	module-init-tool < 0.9.10
+Conflicts:	module-init-tools < 0.9.10
 Conflicts:	nfs-utils < 1.0.5
 Conflicts:	oprofile < 0.9
 Conflicts:	ppp < 1:2.4.0
@@ -86,7 +100,7 @@ Conflicts:	udev < 1:071
 Conflicts:	util-linux < 2.10o
 Conflicts:	xfsprogs < 2.6.0
 %if %{with pae}
-ExclusiveArch:	%{ix86}
+ExclusiveArch:  %{ix86}
 ExcludeArch:	i386 i486 i586
 %else
 ExclusiveArch:	%{ix86} %{x8664}
@@ -94,36 +108,37 @@ ExclusiveArch:	%{ix86} %{x8664}
 ExclusiveOS:	Linux
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
+%ifarch %{ix86} %{x8664}
+%define		target_arch_dir		x86
+%endif
+%ifnarch %{ix86} %{x8664}
+%define		target_arch_dir		%{_target_base_arch}
+%endif
+
+%define		defconfig	arch/%{target_arch_dir}/defconfig
+
 # No ELF objects there to strip (skips processing 27k files)
 %define		_noautostrip	.*%{_kernelsrcdir}/.*
+%define		_noautochrpath	.*%{_kernelsrcdir}/.*
 
-%define		x86_target_base_arch	x86
 %define		initrd_dir	/boot
 
-# kernel release (used in filesystem and eventually in uname -r)
-# modules will be looked from /lib/modules/%{kernel_release}
-# _localversion is just that without version for "> localversion"
-%define		_localversion %{release}
-%define		kernel_release %{version}-%{alt_kernel}-%{_localversion}
 %define		_kernelsrcdir	/usr/src/linux-%{version}-%{alt_kernel}
 
-%define	CommonOpts	HOSTCC="%{__cc}" HOSTCFLAGS="-Wall -Wstrict-prototypes %{rpmcflags} -fomit-frame-pointer"
 %if "%{_target_base_arch}" != "%{_arch}"
-	%define	MakeOpts %{CommonOpts} ARCH=%{_target_base_arch} CROSS_COMPILE=%{_target_cpu}-pld-linux-
+	%define CrossOpts ARCH=%{_target_base_arch} CROSS_COMPILE=%{_target_cpu}-pld-linux-
 	%define	DepMod /bin/true
 
 	%if "%{_arch}" == "x86_64" && "%{_target_base_arch}" == "i386"
-	%define	MakeOpts %{CommonOpts} CC="%{__cc}" ARCH=%{_target_base_arch}
+	%define	CrossOpts ARCH=%{_target_base_arch} CC="%{__cc}"
 	%define	DepMod /sbin/depmod
 	%endif
 
 %else
-	%define MakeOpts %{CommonOpts} CC="%{__cc}"
+	%define CrossOpts ARCH=%{_target_base_arch} CC="%{__cc}"
 	%define	DepMod /sbin/depmod
 %endif
 
-%define __features Enabled features:\
-%{?debug: - DEBUG}\
 %define Features %(echo "%{__features}" | sed '/^$/d')
 
 %description
@@ -133,131 +148,145 @@ Most hardware is instead supported by modules loaded after booting.
 
 %{Features}
 
-%description -l de
-Das Kernel-Packet enthält den Linux-Kernel (vmlinuz), den Kern des
-Linux-Betriebssystems. Der Kernel ist für grundliegende
+%description -l de.UTF-8
+Das Kernel-Paket enthÃ¤lt den Linux-Kernel (vmlinuz), den Kern des
+Linux-Betriebssystems. Der Kernel ist fÃ¼r grundliegende
 Systemfunktionen verantwortlich: Speicherreservierung,
-Prozeß-Management, Geräte Ein- und Ausgaben, usw.
+ProzeÃŸ-Management, GerÃ¤te Ein- und Ausgaben, usw.
 
 %{Features}
 
-%description -l fr
+%description -l fr.UTF-8
 Le package kernel contient le kernel linux (vmlinuz), la partie
-centrale d'un système d'exploitation Linux. Le noyau traite les
-fonctions basiques d'un système d'exploitation: allocation mémoire,
-allocation de process, entrée/sortie de peripheriques, etc.
+centrale d'un systÃ¨me d'exploitation Linux. Le noyau traite les
+fonctions basiques d'un systÃ¨me d'exploitation: allocation mÃ©moire,
+allocation de process, entrÃ©e/sortie de peripheriques, etc.
 
 %{Features}
 
-%description -l pl
-Pakiet zawiera j±dro Linuksa niezbêdne do prawid³owego dzia³ania
-Twojego komputera. Zawiera w sobie sterowniki do sprzêtu znajduj±cego
-siê w komputerze, takiego jak sterowniki dysków itp.
+%description -l pl.UTF-8
+Pakiet zawiera jÄ…dro Linuksa niezbÄ™dne do prawidÅ‚owego dziaÅ‚ania
+Twojego komputera. Zawiera w sobie sterowniki do sprzÄ™tu znajdujÄ…cego
+siÄ™ w komputerze, takiego jak sterowniki dyskÃ³w itp.
 
 %{Features}
 
 %package vmlinux
 Summary:	vmlinux - uncompressed kernel image
-Summary(de):	vmlinux - dekompressiertes Kernel Bild
-Summary(pl):	vmlinux - rozpakowany obraz j±dra
+Summary(de.UTF-8):	vmlinux - dekompressiertes Kernel Bild
+Summary(pl.UTF-8):	vmlinux - rozpakowany obraz jÄ…dra
 Group:		Base/Kernel
+Obsoletes:	kernel-smp-vmlinux
 
 %description vmlinux
 vmlinux - uncompressed kernel image.
 
-%description vmlinux -l de
+%description vmlinux -l de.UTF-8
 vmlinux - dekompressiertes Kernel Bild.
 
-%description vmlinux -l pl
-vmlinux - rozpakowany obraz j±dra.
+%description vmlinux -l pl.UTF-8
+vmlinux - rozpakowany obraz jÄ…dra.
 
 %package drm
 Summary:	DRM kernel modules
-Summary(de):	DRM Kernel Treiber
-Summary(pl):	Sterowniki DRM
+Summary(de.UTF-8):	DRM Kernel Treiber
+Summary(pl.UTF-8):	Sterowniki DRM
 Group:		Base/Kernel
-Requires(postun):	%{name}-up = %{epoch}:%{version}-%{release}
-Requires:	%{name}-up = %{epoch}:%{version}-%{release}
-Provides:	kernel-drm = %{drm_xfree_version}
+Requires(postun):	%{name} = %{epoch}:%{version}-%{release}
+Requires:	%{name} = %{epoch}:%{version}-%{release}
+Obsoletes:	kernel-smp-drm
 Autoreqprov:	no
 
 %description drm
-DRM kernel modules (%{drm_xfree_version}).
+DRM kernel modules.
 
-%description drm -l de
-DRM Kernel Treiber (%{drm_xfree_version}).
+%description drm -l de.UTF-8
+DRM Kernel Treiber.
 
-%description drm -l pl
-Sterowniki DRM (%{drm_xfree_version}).
+%description drm -l pl.UTF-8
+Sterowniki DRM.
 
 %package pcmcia
 Summary:	PCMCIA modules
-Summary(de):	PCMCIA Module
-Summary(pl):	Modu³y PCMCIA
+Summary(de.UTF-8):	PCMCIA Module
+Summary(pl.UTF-8):	ModuÅ‚y PCMCIA
 Group:		Base/Kernel
-Requires(postun):	%{name}-up = %{epoch}:%{version}-%{release}
-Requires:	%{name}-up = %{epoch}:%{version}-%{release}
-Provides:	kernel(pcmcia)
-Provides:	kernel-pcmcia = %{pcmcia_version}
+Requires(postun):	%{name} = %{epoch}:%{version}-%{release}
+Requires:	%{name} = %{epoch}:%{version}-%{release}
+Obsoletes:	kernel-smp-pcmcia
 Conflicts:	pcmcia-cs < 3.1.21
 Conflicts:	pcmciautils < 004
 Autoreqprov:	no
 
 %description pcmcia
-PCMCIA modules (%{pcmcia_version}).
+PCMCIA modules.
 
-%description pcmcia -l de
-PCMCIA Module (%{pcmcia_version})
+%description pcmcia -l de.UTF-8
+PCMCIA Module.
 
-%description pcmcia -l pl
-Modu³y PCMCIA (%{pcmcia_version}).
+%description pcmcia -l pl.UTF-8
+ModuÅ‚y PCMCIA.
+
+%package libs
+Summary:	Libraries for preparing bootable kernel on PowerPCs
+Summary(pl.UTF-8):	Biblioteki do przygotowania bootowalnego jÄ…dra dla PowerPC
+Group:		Base/Kernel
+Requires:	%{name} = %{epoch}:%{version}-%{release}
+Requires:	mkvmlinuz >= 1.3
+Obsoletes:	kernel-smp-libs
+Autoreqprov:	no
+
+%description libs
+Libraries for preparing bootable kernel on PowerPCs. Script called
+mkvmlinuz may be useful for this.
+
+%description libs -l pl.UTF-8
+Biblioteki do przygotowania bootowalnego jÄ…dra dla PowerPC. Skrypt
+mkvmlinuz moÅ¼e byÄ‡ do tego przydatny.
 
 %package sound-alsa
 Summary:	ALSA kernel modules
-Summary(de):	ALSA Kernel Module
-Summary(pl):	Sterowniki d¼wiêku ALSA
+Summary(de.UTF-8):	ALSA Kernel Module
+Summary(pl.UTF-8):	Sterowniki dÅºwiÄ™ku ALSA
 Group:		Base/Kernel
-Requires(postun):	%{name}-up = %{epoch}:%{version}-%{release}
-Requires:	%{name}-up = %{epoch}:%{version}-%{release}
+Requires(postun):	%{name} = %{epoch}:%{version}-%{release}
+Requires:	%{name} = %{epoch}:%{version}-%{release}
+Obsoletes:	kernel-smp-sound-alsa
 Autoreqprov:	no
 
 %description sound-alsa
 ALSA (Advanced Linux Sound Architecture) sound drivers.
 
-%description sound-alsa -l de
+%description sound-alsa -l de.UTF-8
 ALSA (Advanced Linux Sound Architecture) Sound-Treiber.
 
-%description sound-alsa -l pl
-Sterowniki d¼wiêku ALSA (Advanced Linux Sound Architecture).
+%description sound-alsa -l pl.UTF-8
+Sterowniki dÅºwiÄ™ku ALSA (Advanced Linux Sound Architecture).
 
 %package sound-oss
 Summary:	OSS kernel modules
-Summary(de):	OSS Kernel Module
-Summary(pl):	Sterowniki d¼wiêku OSS
+Summary(de.UTF-8):	OSS Kernel Module
+Summary(pl.UTF-8):	Sterowniki dÅºwiÄ™ku OSS
 Group:		Base/Kernel
-Requires(postun):	%{name}-up = %{epoch}:%{version}-%{release}
-Requires:	%{name}-up = %{epoch}:%{version}-%{release}
+Requires(postun):	%{name} = %{epoch}:%{version}-%{release}
+Requires:	%{name} = %{epoch}:%{version}-%{release}
+Obsoletes:	kernel-smp-sound-oss
 Autoreqprov:	no
 
 %description sound-oss
 OSS (Open Sound System) drivers.
 
-%description sound-oss -l de
+%description sound-oss -l de.UTF-8
 OSS (Open Sound System) Treiber.
 
-%description sound-oss -l pl
-Sterowniki d¼wiêku OSS (Open Sound System).
+%description sound-oss -l pl.UTF-8
+Sterowniki dÅºwiÄ™ku OSS (Open Sound System).
 
 %package headers
 Summary:	Header files for the Linux kernel
-Summary(de):	Header Dateien für den Linux-Kernel
-Summary(pl):	Pliki nag³ówkowe j±dra Linuksa
+Summary(de.UTF-8):	Header Dateien fÃ¼r den Linux-Kernel
+Summary(pl.UTF-8):	Pliki nagÅ‚Ã³wkowe jÄ…dra Linuksa
 Group:		Development/Building
-Provides:	kernel-headers = %{epoch}:%{version}-%{release}
-Provides:	kernel-headers(agpgart) = %{version}
-Provides:	kernel-headers(alsa-drivers)
-Provides:	kernel-headers(bridging) = %{version}
-Provides:	kernel-headers(reiserfs) = %{version}
 Autoreqprov:	no
 
 %description headers
@@ -265,93 +294,91 @@ These are the C header files for the Linux kernel, which define
 structures and constants that are needed when rebuilding the kernel or
 building kernel modules.
 
-%description headers -l de
-Dies sind die C Header Dateien für den Linux-Kernel, die definierte
-Strukturen und Konstante beinhalten die beim rekompilieren des Kernels
-oder bei Kernel Modul kompilationen gebraucht werden.
+%description headers -l de.UTF-8
+Dies sind die C Header Dateien fÃ¼r den Linux-Kernel, die definierte
+Strukturen und Konstante beinhalten, die beim rekompilieren des
+Kernels oder bei Kernel Modul kompilationen gebraucht werden.
 
-%description headers -l pl
-Pakiet zawiera pliki nag³ówkowe j±dra, niezbêdne do rekompilacji j±dra
-oraz budowania modu³ów j±dra.
+%description headers -l pl.UTF-8
+Pakiet zawiera pliki nagÅ‚Ã³wkowe jÄ…dra, niezbÄ™dne do rekompilacji jÄ…dra
+oraz budowania moduÅ‚Ã³w jÄ…dra.
 
 %package module-build
 Summary:	Development files for building kernel modules
-Summary(de):	Development Dateien die beim Kernel Modul kompilationen gebraucht werden
-Summary(pl):	Pliki s³u¿±ce do budowania modu³ów j±dra
+Summary(de.UTF-8):	Development Dateien die beim Kernel Modul kompilationen gebraucht werden
+Summary(pl.UTF-8):	Pliki sÅ‚uÅ¼Ä…ce do budowania moduÅ‚Ã³w jÄ…dra
 Group:		Development/Building
 Requires:	%{name}-headers = %{epoch}:%{version}-%{release}
-Provides:	kernel-module-build = %{epoch}:%{version}-%{release}
+Conflicts:	rpmbuild(macros) < 1.321
 Autoreqprov:	no
 
 %description module-build
 Development files from kernel source tree needed to build Linux kernel
 modules from external packages.
 
-%description module-build -l de
+%description module-build -l de.UTF-8
 Development Dateien des Linux-Kernels die beim kompilieren externer
 Kernel Module gebraucht werden.
 
-%description module-build -l pl
-Pliki ze drzewa ¼róde³ j±dra potrzebne do budowania modu³ów j±dra
-Linuksa z zewnêtrznych pakietów.
+%description module-build -l pl.UTF-8
+Pliki ze drzewa ÅºrÃ³deÅ‚ jÄ…dra potrzebne do budowania moduÅ‚Ã³w jÄ…dra
+Linuksa z zewnÄ™trznych pakietÃ³w.
 
 %package source
 Summary:	Kernel source tree
-Summary(de):	Der Kernel Quelltext
-Summary(pl):	Kod ¼ród³owy j±dra Linuksa
+Summary(de.UTF-8):	Der Kernel Quelltext
+Summary(pl.UTF-8):	Kod ÅºrÃ³dÅ‚owy jÄ…dra Linuksa
 Group:		Development/Building
 Requires:	%{name}-module-build = %{epoch}:%{version}-%{release}
-Provides:	kernel-source = %{epoch}:%{version}-%{release}
 Autoreqprov:	no
 
 %description source
 This is the source code for the Linux kernel. You can build a custom
 kernel that is better tuned to your particular hardware.
 
-%description source -l de
-Das Kernel-Source-Packet enthält den source code (C/Assembler-Code)
-des Linux-Kernels. Die Source-Dateien werden gebraucht, um viele
-C-Programme zu kompilieren, da sie auf Konstanten zurückgreifen, die
-im Kernel-Source definiert sind. Die Source-Dateien können auch
+%description source -l de.UTF-8
+Das Kernel-Source-Paket enthÃ¤lt den source code (C/Assembler-Code) des
+Linux-Kernels. Die Source-Dateien werden gebraucht, um viele
+C-Programme zu kompilieren, da sie auf Konstanten zurÃ¼ckgreifen, die
+im Kernel-Source definiert sind. Die Source-Dateien kÃ¶nnen auch
 benutzt werden, um einen Kernel zu kompilieren, der besser auf Ihre
 Hardware ausgerichtet ist.
 
-%description source -l fr
+%description source -l fr.UTF-8
 Le package pour le kernel-source contient le code source pour le noyau
-linux. Ces sources sont nécessaires pour compiler la plupart des
-programmes C, car il dépend de constantes définies dans le code
-source. Les sources peuvent être aussi utilisée pour compiler un noyau
-personnalisé pour avoir de meilleures performances sur des matériels
+linux. Ces sources sont nÃ©cessaires pour compiler la plupart des
+programmes C, car il dÃ©pend de constantes dÃ©finies dans le code
+source. Les sources peuvent Ãªtre aussi utilisÃ©e pour compiler un noyau
+personnalisÃ© pour avoir de meilleures performances sur des matÃ©riels
 particuliers.
 
-%description source -l pl
-Pakiet zawiera kod ¼ród³owy j±dra systemu.
+%description source -l pl.UTF-8
+Pakiet zawiera kod ÅºrÃ³dÅ‚owy jÄ…dra systemu.
 
 %package doc
 Summary:	Kernel documentation
-Summary(de):	Kernel Dokumentation
-Summary(pl):	Dokumentacja do j±dra Linuksa
+Summary(de.UTF-8):	Kernel Dokumentation
+Summary(pl.UTF-8):	Dokumentacja do jÄ…dra Linuksa
 Group:		Documentation
-Provides:	kernel-doc = %{version}
 Autoreqprov:	no
 
 %description doc
 This is the documentation for the Linux kernel, as found in
-Documentation directory.
+/usr/src/linux/Documentation directory.
 
-%description doc -l de
+%description doc -l de.UTF-8
 Dies ist die Kernel Dokumentation wie sie im 'Documentation'
 Verzeichniss vorgefunden werden kann.
 
-%description doc -l pl
-Pakiet zawiera dokumentacjê do j±dra Linuksa pochodz±c± z katalogu
-Documentation.
+%description doc -l pl.UTF-8
+Pakiet zawiera dokumentacjÄ™ do jÄ…dra Linuksa pochodzÄ…cÄ… z katalogu
+/usr/src/linux/Documentation.
 
 %prep
 %setup -q -n linux-%{_basever}
 
 %if "%{_postver}" != "%{nil}"
-%{__bzip2} -dc %{SOURCE1} | %{__patch} -p1 -s
+%{__bzip2} -dc %{SOURCE1} | patch -p1 -s
 %endif
 
 %patch100 -p1
@@ -361,17 +388,20 @@ Documentation.
 # Fix EXTRAVERSION in main Makefile
 sed -i 's#EXTRAVERSION =.*#EXTRAVERSION = %{_postver}-%{alt_kernel}#g' Makefile
 
+# on sparc this line causes CONFIG_INPUT=m (instead of =y), thus breaking build
 sed -i -e '/select INPUT/d' net/bluetooth/hidp/Kconfig
 
-# remove unwanted files after patching (if any)
-find . '(' -name '*~' -o -name '*.orig' -o -name '.gitignore' ')' -print0 | xargs -0 -r -l512 rm -f
+# cleanup backups after patching
+find '(' -name '*~' -o -name '*.orig' -o -name '.gitignore' ')' -print0 | xargs -0 -r -l512 rm -f
 
 %build
 TuneUpConfigForIX86 () {
+	set -x
 %ifarch %{ix86}
 	pae=
+	[ "$2" = "yes" ] && pae=yes
 	%if %{with pae}
-		pae=yes
+	pae=yes
 	%endif
 	%ifnarch i386
 	sed -i 's:CONFIG_M386=y:# CONFIG_M386 is not set:' $1
@@ -405,112 +435,96 @@ TuneUpConfigForIX86 () {
 %endif
 }
 
-rm -f .config
 BuildConfig() {
 	%{?debug:set -x}
-%ifarch %{ix86}
-	Config="%{x86_target_base_arch}"
-%else
-	Config="%{_target_base_arch}"
-%endif
+	# is this a special kernel we want to build?
+	Config="%{target_arch_dir}"
 	KernelVer=%{kernel_release}
+	echo "Building config file using $Config.conf..."
+	cat $RPM_SOURCE_DIR/kernel-bare-vserver-$Config.config > %{defconfig}
+	TuneUpConfigForIX86 %{defconfig}
 
-	echo "Building config file [using $Config.conf] for KERNEL ..."
+%{?debug:sed -i "s:# CONFIG_DEBUG_SLAB is not set:CONFIG_DEBUG_SLAB=y:" %{defconfig}}
+%{?debug:sed -i "s:# CONFIG_DEBUG_PREEMPT is not set:CONFIG_DEBUG_PREEMPT=y:" %{defconfig}}
+%{?debug:sed -i "s:# CONFIG_RT_DEADLOCK_DETECT is not set:CONFIG_RT_DEADLOCK_DETECT=y:" %{defconfig}}
 
-	echo "" > .config
-	cat $RPM_SOURCE_DIR/kernel-bare-vserver-$Config.config >> .config
-	sed -i "/CONFIG_LOCALVERSION=.*/d" .config
-	echo "CONFIG_LOCALVERSION=\"-%{_localversion}\"" >> .config
-
-	TuneUpConfigForIX86 .config
-
-	%if %{with preempt}
-		echo "# CONFIG_DEBUG_PREEMPT is not set" >> .config
-		sed -i "s:CONFIG_PREEMPT_NONE=y:# CONFIG_PREEMPT_NONE is not set:" .config
-		sed -i "s:# CONFIG_PREEMPT is not set:CONFIG_PREEMPT=y:" .config
-		sed -i "s:# CONFIG_PREEMPT_BKL is not set:CONFIG_PREEMPT_BKL=y:" .config
-	%endif
-
-%{?debug:sed -i "s:# CONFIG_DEBUG_SLAB is not set:CONFIG_DEBUG_SLAB=y:" .config}
-%{?debug:sed -i "s:# CONFIG_DEBUG_PREEMPT is not set:CONFIG_DEBUG_PREEMPT=y:" .config}
-%{?debug:sed -i "s:# CONFIG_RT_DEADLOCK_DETECT is not set:CONFIG_RT_DEADLOCK_DETECT=y:" .config}
-
-	install .config arch/%{x86_target_base_arch}/defconfig
-	install -d $KERNEL_INSTALL_DIR%{_kernelsrcdir}/include/linux
-	rm -f include/linux/autoconf.h
-	%{__make} %{MakeOpts} include/linux/autoconf.h
-	install include/linux/autoconf.h \
-		$KERNEL_INSTALL_DIR%{_kernelsrcdir}/include/linux/autoconf-dist.h
-	install .config \
-		$KERNEL_INSTALL_DIR%{_kernelsrcdir}/config-dist
-	install .config arch/%{x86_target_base_arch}/defconfig
 }
 
 BuildKernel() {
 	%{?debug:set -x}
-	echo "Building kernel ..."
-	%{__make} %{MakeOpts} mrproper \
+	echo "Building kernel $1 ..."
+	%{__make} %CrossOpts mrproper \
 		RCS_FIND_IGNORE='-name build-done -prune -o'
-	install arch/%{x86_target_base_arch}/defconfig .config
+	ln -sf %{defconfig} .config
 
-	%{__make} %{MakeOpts} clean \
+	%{__make} %CrossOpts clean \
 		RCS_FIND_IGNORE='-name build-done -prune -o'
-
-	%{__make} %{MakeOpts} include/linux/version.h \
+	%{__make} %CrossOpts include/linux/version.h \
 		%{?with_verbose:V=1}
 
-	%{__make} %{MakeOpts} \
+	%{__make} %CrossOpts scripts/mkcompile_h \
+		%{?with_verbose:V=1}
+
+	%{__make} %CrossOpts \
 		%{?with_verbose:V=1}
 }
 
 PreInstallKernel() {
-%ifarch %{ix86}
-	Config="%{x86_target_base_arch}"
-%else
-	Config="%{_target_base_arch}"
-%endif
+	Config="%{target_arch_dir}"
 	KernelVer=%{kernel_release}
 
 	mkdir -p $KERNEL_INSTALL_DIR/boot
 	install System.map $KERNEL_INSTALL_DIR/boot/System.map-$KernelVer
 %ifarch %{ix86} %{x8664}
 	install arch/x86/boot/bzImage $KERNEL_INSTALL_DIR/boot/vmlinuz-$KernelVer
+	install vmlinux $KERNEL_INSTALL_DIR/boot/vmlinux-$KernelVer
 %endif
 
-	install vmlinux $KERNEL_INSTALL_DIR/boot/vmlinux-$KernelVer
-
-	%{__make} %{MakeOpts} modules_install \
+	%{__make} %CrossOpts modules_install \
 		%{?with_verbose:V=1} \
-		DEPMOD=%{DepMod} \
+		DEPMOD=%DepMod \
 		INSTALL_MOD_PATH=$KERNEL_INSTALL_DIR \
 		KERNELRELEASE=$KernelVer
 
-	install Module.symvers \
-		$KERNEL_INSTALL_DIR%{_kernelsrcdir}/Module.symvers-dist
+	# You'd probabelly want to make it somewhat different
+	install -d $KERNEL_INSTALL_DIR%{_kernelsrcdir}
+	install Module.symvers $KERNEL_INSTALL_DIR%{_kernelsrcdir}/Module.symvers-dist
 
 	echo "CHECKING DEPENDENCIES FOR KERNEL MODULES"
-	%if "%{_target_base_arch}" != "%{_arch}"
-		touch $KERNEL_INSTALL_DIR/lib/modules/$KernelVer/modules.dep
-	%else
-		/sbin/depmod --basedir $KERNEL_INSTALL_DIR -ae \
-			-F $KERNEL_INSTALL_DIR/boot/System.map-$KernelVer -r $KernelVer \
-			|| echo
-	%endif
+	if [ %DepMod = /sbin/depmod ]; then
+		/sbin/depmod --basedir $KERNEL_INSTALL_DIR -ae -F $KERNEL_INSTALL_DIR/boot/System.map-$KernelVer -r $KernelVer || :
+	fi
+	touch $KERNEL_INSTALL_DIR/lib/modules/$KernelVer/modules.dep
 	echo "KERNEL RELEASE $KernelVer DONE"
 }
 
 KERNEL_BUILD_DIR=`pwd`
+echo "-%{_localversion}" > localversion
 
 KERNEL_INSTALL_DIR="$KERNEL_BUILD_DIR/build-done/kernel"
 rm -rf $KERNEL_INSTALL_DIR
 BuildConfig
+ln -sf %{defconfig} .config
+install -d $KERNEL_INSTALL_DIR%{_kernelsrcdir}/include/linux
+rm -f include/linux/autoconf.h
+%{__make} %CrossOpts include/linux/autoconf.h
+install include/linux/autoconf.h \
+	$KERNEL_INSTALL_DIR%{_kernelsrcdir}/include/linux/autoconf-dist.h
+install .config \
+	$KERNEL_INSTALL_DIR%{_kernelsrcdir}/config-dist
 BuildKernel
 PreInstallKernel
+
+%{__make} %CrossOpts include/linux/utsrelease.h
+cp include/linux/utsrelease.h{,.save}
+cp include/linux/version.h{,.save}
+cp scripts/mkcompile_h{,.save}
 
 %install
 rm -rf $RPM_BUILD_ROOT
 umask 022
-export DEPMOD=%{DepMod}
+
+export DEPMOD=%DepMod
 
 install -d $RPM_BUILD_ROOT%{_kernelsrcdir}
 install -d $RPM_BUILD_ROOT%{_sysconfdir}/modprobe.d/%{kernel_release}
@@ -525,55 +539,55 @@ KERNEL_BUILD_DIR=`pwd`
 
 cp -a$l $KERNEL_BUILD_DIR/build-done/kernel/* $RPM_BUILD_ROOT
 
-if [ -e  $RPM_BUILD_ROOT/lib/modules/%{kernel_release}$i ] ; then
-	rm -f $RPM_BUILD_ROOT/lib/modules/%{kernel_release}$i/build
-	ln -sf %{_kernelsrcdir} \
-		$RPM_BUILD_ROOT/lib/modules/%{kernel_release}$i/build
-	install -d $RPM_BUILD_ROOT/lib/modules/%{kernel_release}$i/{cluster,misc}
+if [ -e  $RPM_BUILD_ROOT/lib/modules/%{kernel_release} ] ; then
+	rm -f $RPM_BUILD_ROOT/lib/modules/%{kernel_release}/build
+	ln -sf %{_kernelsrcdir} $RPM_BUILD_ROOT/lib/modules/%{kernel_release}/build
+	install -d $RPM_BUILD_ROOT/lib/modules/%{kernel_release}/{cluster,misc}
 fi
 
 find . -maxdepth 1 ! -name "build-done" ! -name "." -exec cp -a$l "{}" "$RPM_BUILD_ROOT%{_kernelsrcdir}/" ";"
 
 cd $RPM_BUILD_ROOT%{_kernelsrcdir}
 
-%{__make} %{MakeOpts} mrproper archclean \
+%{__make} %CrossOpts mrproper archclean \
 	RCS_FIND_IGNORE='-name build-done -prune -o'
 
-find '(' -name '*~' -o -name '*.orig' ')' -print0 | xargs -0 -r -l512 rm -f
-
-if [ -e $KERNEL_BUILD_DIR/build-done/kernel-UP%{_kernelsrcdir}/include/linux/autoconf-dist.h ]; then
-install $KERNEL_BUILD_DIR/build-done/kernel-UP%{_kernelsrcdir}/include/linux/autoconf-dist.h \
-	$RPM_BUILD_ROOT%{_kernelsrcdir}/include/linux
-install	$KERNEL_BUILD_DIR/build-done/kernel-UP%{_kernelsrcdir}/config-dist \
-	$RPM_BUILD_ROOT%{_kernelsrcdir}
+if [ -e $KERNEL_BUILD_DIR/build-done/kernel%{_kernelsrcdir}/include/linux/autoconf-dist.h ]; then
+	install $KERNEL_BUILD_DIR/build-done/kernel%{_kernelsrcdir}/include/linux/autoconf-dist.h \
+		$RPM_BUILD_ROOT%{_kernelsrcdir}/include/linux
+	install	$KERNEL_BUILD_DIR/build-done/kernel%{_kernelsrcdir}/config-dist \
+		$RPM_BUILD_ROOT%{_kernelsrcdir}
 fi
 
-install $KERNEL_BUILD_DIR/build-done/kernel%{_kernelsrcdir}/include/linux/* \
+cp -Rdp$l $KERNEL_BUILD_DIR/include/linux/* \
 	$RPM_BUILD_ROOT%{_kernelsrcdir}/include/linux
 
-install $KERNEL_BUILD_DIR/build-done/kernel%{_kernelsrcdir}/config-dist \
-	.config
-
-%{__make} %{MakeOpts} include/linux/version.h include/linux/utsrelease.h
-mv include/linux/version.h{,.save}
-mv include/linux/utsrelease.h{,.save}
-%{__make} %{MakeOpts} mrproper
-mv include/linux/version.h{.save,}
-mv include/linux/utsrelease.h{.save,}
-#install %{SOURCE3} $RPM_BUILD_ROOT%{_kernelsrcdir}/include/linux/autoconf.h
+%{__make} %CrossOpts mrproper
+mv -f include/linux/utsrelease.h.save $RPM_BUILD_ROOT%{_kernelsrcdir}/include/linux/utsrelease.h
+cp include/linux/version.h{.save,}
+cp scripts/mkcompile_h{.save,}
+rm -rf include/linux/version.h.save
+rm -rf scripts/mkcompile_h.save
+install %{SOURCE2} $RPM_BUILD_ROOT%{_kernelsrcdir}/include/linux/autoconf.h
 install %{SOURCE3} $RPM_BUILD_ROOT%{_kernelsrcdir}/include/linux/config.h
 
 # collect module-build files and directories
-%{__perl} %{SOURCE2} %{_kernelsrcdir} $KERNEL_BUILD_DIR
+perl %{SOURCE4} %{_kernelsrcdir} $KERNEL_BUILD_DIR
 
 # ghosted initrd
-touch $RPM_BUILD_ROOT/boot/initrd-%{kernel_release}.gz
+touch $RPM_BUILD_ROOT%{initrd_dir}/initrd-%{kernel_release}.gz
+
+# rpm obeys filelinkto checks for ghosted symlinks, convert to files
+rm -f $RPM_BUILD_ROOT/lib/modules/%{kernel_release}/{build,source}
+touch $RPM_BUILD_ROOT/lib/modules/%{kernel_release}/{build,source}
+
+# remove unnecessary dir with dead symlink
+rm -rf $RPM_BUILD_ROOT/arch/i386
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %preun
-rm -f /lib/modules/%{kernel_release}/modules.*
 if [ -x /sbin/new-kernel-pkg ]; then
 	/sbin/new-kernel-pkg --remove %{kernel_release}
 fi
@@ -633,7 +647,6 @@ ln -sf vmlinux-%{kernel_release} /boot/vmlinux-%{alt_kernel}
 %depmod %{kernel_release}
 
 %post headers
-rm -f %{_prefix}/src/linux-%{alt_kernel}
 ln -snf %{basename:%{_kernelsrcdir}} %{_prefix}/src/linux-%{alt_kernel}
 
 %postun headers
@@ -645,88 +658,121 @@ if [ "$1" = "0" ]; then
 	fi
 fi
 
+%triggerin module-build -- %{name} = %{epoch}:%{version}-%{release}
+ln -sfn %{_kernelsrcdir} /lib/modules/%{kernel_release}/build
+ln -sfn %{_kernelsrcdir} /lib/modules/%{kernel_release}/source
+
+%triggerun module-build -- %{name} = %{epoch}:%{version}-%{release}
+if [ "$1" = 0 ]; then
+	rm -f /lib/modules/%{kernel_release}/{build,source}
+fi
+
 %files
 %defattr(644,root,root,755)
 /boot/vmlinuz-%{kernel_release}
 /boot/System.map-%{kernel_release}
-%ghost /boot/initrd-%{kernel_release}.gz
+%ghost %{initrd_dir}/initrd-%{kernel_release}.gz
 %dir /lib/modules/%{kernel_release}
 %dir /lib/modules/%{kernel_release}/kernel
 /lib/modules/%{kernel_release}/kernel/arch
 /lib/modules/%{kernel_release}/kernel/crypto
 /lib/modules/%{kernel_release}/kernel/drivers
+%if %{have_drm}
+%exclude /lib/modules/%{kernel_release}/kernel/drivers/char/drm
+%endif
 /lib/modules/%{kernel_release}/kernel/fs
+
+# this directory will be removed after disabling rcutorture mod. in 2.6.20.
 /lib/modules/%{kernel_release}/kernel/kernel
+
 /lib/modules/%{kernel_release}/kernel/lib
 /lib/modules/%{kernel_release}/kernel/net
-%dir /lib/modules/%{kernel_release}/kernel/sound
-/lib/modules/%{kernel_release}/kernel/sound/soundcore.*
 %if %{have_sound}
-%exclude /lib/modules/%{kernel_release}/kernel/drivers/media/video/*/*-alsa.ko*
+%dir /lib/modules/%{kernel_release}/kernel/sound
+/lib/modules/%{kernel_release}/kernel/sound/ac97_bus.ko*
+/lib/modules/%{kernel_release}/kernel/sound/sound*.ko*
+%exclude /lib/modules/%{kernel_release}/kernel/drivers/media/video/cx88/cx88-alsa.ko*
+%exclude /lib/modules/%{kernel_release}/kernel/drivers/media/video/em28xx/em28xx-alsa.ko*
+%exclude /lib/modules/%{kernel_release}/kernel/drivers/media/video/saa7134/saa7134-alsa.ko*
 %endif
 %dir /lib/modules/%{kernel_release}/misc
-%if %{have_pcmcia}
-%exclude /lib/modules/%{kernel_release}/kernel/drivers/pcmcia
+%if %{with pcmcia}
+%dir /lib/modules/%{kernel_release}/kernel/drivers/pcmcia
+/lib/modules/%{kernel_release}/kernel/drivers/pcmcia/pcmcia*ko*
+%exclude /lib/modules/%{kernel_release}/kernel/drivers/pcmcia/[!p]*
+%exclude /lib/modules/%{kernel_release}/kernel/drivers/pcmcia/pd6729.ko*
 %exclude /lib/modules/%{kernel_release}/kernel/drivers/*/pcmcia
+%exclude /lib/modules/%{kernel_release}/kernel/drivers/ata/pata_pcmcia.ko*
 %exclude /lib/modules/%{kernel_release}/kernel/drivers/bluetooth/*_cs.ko*
-%exclude /lib/modules/%{kernel_release}/kernel/drivers/ide/legacy/ide-cs.ko*
 %exclude /lib/modules/%{kernel_release}/kernel/drivers/isdn/hardware/avm/avm_cs.ko*
+%exclude /lib/modules/%{kernel_release}/kernel/drivers/telephony/ixj_pcmcia.ko*
+%exclude /lib/modules/%{kernel_release}/kernel/drivers/usb/gadget/g_midi.ko*
+%exclude /lib/modules/%{kernel_release}/kernel/drivers/ide/legacy/ide-cs.ko*
 %exclude /lib/modules/%{kernel_release}/kernel/drivers/net/wireless/*_cs.ko*
+%exclude /lib/modules/%{kernel_release}/kernel/drivers/net/wireless/b43
 %exclude /lib/modules/%{kernel_release}/kernel/drivers/net/wireless/hostap/hostap_cs.ko*
+%exclude /lib/modules/%{kernel_release}/kernel/drivers/net/wireless/libertas/*_cs.ko*
 %exclude /lib/modules/%{kernel_release}/kernel/drivers/parport/parport_cs.ko*
 %exclude /lib/modules/%{kernel_release}/kernel/drivers/serial/serial_cs.ko*
-%exclude /lib/modules/%{kernel_release}/kernel/drivers/telephony/ixj_pcmcia.ko*
 %exclude /lib/modules/%{kernel_release}/kernel/drivers/usb/host/sl811_cs.ko*
 %endif
-/lib/modules/%{kernel_release}/build
 %ghost /lib/modules/%{kernel_release}/modules.*
+# symlinks pointing to kernelsrcdir
+%ghost /lib/modules/%{kernel_release}/build
+%ghost /lib/modules/%{kernel_release}/source
 %dir %{_sysconfdir}/modprobe.d/%{kernel_release}
 
 %files vmlinux
 %defattr(644,root,root,755)
 /boot/vmlinux-%{kernel_release}
 
+%if %{have_drm}
 %files drm
 %defattr(644,root,root,755)
 /lib/modules/%{kernel_release}/kernel/drivers/char/drm
+%endif
 
-%if %{have_pcmcia}
+%if %{with pcmcia}
 %files pcmcia
 %defattr(644,root,root,755)
-/lib/modules/%{kernel_release}/kernel/drivers/pcmcia
+/lib/modules/%{kernel_release}/kernel/drivers/pcmcia/*ko*
 /lib/modules/%{kernel_release}/kernel/drivers/*/pcmcia
+%exclude /lib/modules/%{kernel_release}/kernel/drivers/pcmcia/pcmcia*ko*
 /lib/modules/%{kernel_release}/kernel/drivers/bluetooth/*_cs.ko*
-/lib/modules/%{kernel_release}/kernel/drivers/ide/legacy/ide-cs.ko*
 /lib/modules/%{kernel_release}/kernel/drivers/isdn/hardware/avm/avm_cs.ko*
+/lib/modules/%{kernel_release}/kernel/drivers/telephony/ixj_pcmcia.ko*
+/lib/modules/%{kernel_release}/kernel/drivers/ata/pata_pcmcia.ko*
+/lib/modules/%{kernel_release}/kernel/drivers/ide/legacy/ide-cs.ko*
 /lib/modules/%{kernel_release}/kernel/drivers/net/wireless/*_cs.ko*
+/lib/modules/%{kernel_release}/kernel/drivers/net/wireless/b43
 /lib/modules/%{kernel_release}/kernel/drivers/net/wireless/hostap/hostap_cs.ko*
+/lib/modules/%{kernel_release}/kernel/drivers/net/wireless/libertas/*_cs.ko*
 /lib/modules/%{kernel_release}/kernel/drivers/parport/parport_cs.ko*
 /lib/modules/%{kernel_release}/kernel/drivers/serial/serial_cs.ko*
-/lib/modules/%{kernel_release}/kernel/drivers/telephony/ixj_pcmcia.ko*
 /lib/modules/%{kernel_release}/kernel/drivers/usb/host/sl811_cs.ko*
-/lib/modules/%{kernel_release}/kernel/sound/pcmcia
 %endif
 
 %if %{have_sound}
 %files sound-alsa
 %defattr(644,root,root,755)
 /lib/modules/%{kernel_release}/kernel/sound
-/lib/modules/%{kernel_release}/kernel/drivers/media/video/*/*-alsa.ko*
 %exclude %dir /lib/modules/%{kernel_release}/kernel/sound
-%exclude /lib/modules/%{kernel_release}/kernel/sound/soundcore.*
+%exclude /lib/modules/%{kernel_release}/kernel/sound/ac97_bus.ko*
+%exclude /lib/modules/%{kernel_release}/kernel/sound/sound*.ko*
 %if %{have_oss}
 %exclude /lib/modules/%{kernel_release}/kernel/sound/oss
 %endif
-%if %{have_pcmcia}
-%exclude /lib/modules/%{kernel_release}/kernel/sound/pcmcia
-%endif
+/lib/modules/%{kernel_release}/kernel/drivers/usb/gadget/g_midi.ko*
+/lib/modules/%{kernel_release}/kernel/drivers/media/video/cx88/cx88-alsa.ko*
+/lib/modules/%{kernel_release}/kernel/drivers/media/video/em28xx/em28xx-alsa.ko*
+/lib/modules/%{kernel_release}/kernel/drivers/media/video/saa7134/saa7134-alsa.ko*
 
 %if %{have_oss}
 %files sound-oss
 %defattr(644,root,root,755)
 /lib/modules/%{kernel_release}/kernel/sound/oss
-%endif			# %{have_oss}
-%endif			# %{have_sound}
+%endif
+%endif
 
 %files headers
 %defattr(644,root,root,755)
@@ -737,9 +783,14 @@ fi
 
 %files module-build -f aux_files
 %defattr(644,root,root,755)
+# symlinks pointint to kernelsrcdir
+%dir /lib/modules/%{kernel_release}
+/lib/modules/%{kernel_release}/build
 %{_kernelsrcdir}/Kbuild
-%{_kernelsrcdir}/arch/*/kernel/asm-offsets.*
-%{_kernelsrcdir}/arch/*/kernel/sigframe.h
+%{_kernelsrcdir}/localversion
+%{_kernelsrcdir}/arch/*/kernel/asm-offsets*
+%{_kernelsrcdir}/arch/*/kernel/sigframe*.h
+%{_kernelsrcdir}/drivers/lguest/lg.h
 %dir %{_kernelsrcdir}/scripts
 %dir %{_kernelsrcdir}/scripts/kconfig
 %{_kernelsrcdir}/scripts/Kbuild.include
@@ -751,9 +802,11 @@ fi
 %{_kernelsrcdir}/scripts/*.c
 %{_kernelsrcdir}/scripts/*.sh
 %{_kernelsrcdir}/scripts/kconfig/*
+%{_kernelsrcdir}/scripts/mkcompile_h
 
 %files doc
 %defattr(644,root,root,755)
+%dir %{_kernelsrcdir}
 %{_kernelsrcdir}/Documentation
 
 %if %{with source}
@@ -761,22 +814,22 @@ fi
 %defattr(644,root,root,755)
 %{_kernelsrcdir}/arch/*/[!Mk]*
 %{_kernelsrcdir}/arch/*/kernel/[!M]*
-%exclude %{_kernelsrcdir}/arch/*/kernel/asm-offsets.*
-%exclude %{_kernelsrcdir}/arch/*/kernel/sigframe.h
+%{_kernelsrcdir}/arch/x86/kvm
+%exclude %{_kernelsrcdir}/arch/*/kernel/asm-offsets*
+%exclude %{_kernelsrcdir}/arch/*/kernel/sigframe*.h
+%exclude %{_kernelsrcdir}/drivers/lguest/lg.h
 %{_kernelsrcdir}/block
 %{_kernelsrcdir}/crypto
 %{_kernelsrcdir}/drivers
 %{_kernelsrcdir}/fs
-%if %{with grsec_minimal}
 %{_kernelsrcdir}/grsecurity
-%endif
 %{_kernelsrcdir}/init
 %{_kernelsrcdir}/ipc
 %{_kernelsrcdir}/kernel
 %{_kernelsrcdir}/lib
 %{_kernelsrcdir}/mm
 %{_kernelsrcdir}/net
-%{_kernelsrcdir}/samples
+%{_kernelsrcdir}/virt
 %{_kernelsrcdir}/scripts/*
 %exclude %{_kernelsrcdir}/scripts/Kbuild.include
 %exclude %{_kernelsrcdir}/scripts/Makefile*
@@ -795,4 +848,5 @@ fi
 %{_kernelsrcdir}/MAINTAINERS
 %{_kernelsrcdir}/README
 %{_kernelsrcdir}/REPORTING-BUGS
+%{_kernelsrcdir}/.mailmap
 %endif

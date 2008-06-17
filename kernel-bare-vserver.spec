@@ -13,7 +13,7 @@
 %define		have_isa	1
 
 %define		_basever		2.6.25
-%define		_postver		.6
+%define		_postver		.7
 %define		_rel			1
 
 %define		_enable_debug_packages			0
@@ -45,7 +45,7 @@ Source0:	http://www.kernel.org/pub/linux/kernel/v2.6/linux-%{_basever}.tar.bz2
 # Source0-md5:	db95a49a656a3247d4995a797d333153
 %if "%{_postver}" != "%{nil}"
 Source1:	http://www.kernel.org/pub/linux/kernel/v2.6/patch-%{version}.bz2
-# Source1-md5:	124200a50019e7da6010bf7fdd7fb5dc
+# Source1-md5:	015b275011b48f716b3a6b072b18b471
 %endif
 
 Source2:	kernel-bare-vserver-autoconf.h
@@ -232,23 +232,6 @@ PCMCIA Module.
 
 %description pcmcia -l pl.UTF-8
 Moduły PCMCIA.
-
-%package libs
-Summary:	Libraries for preparing bootable kernel on PowerPCs
-Summary(pl.UTF-8):	Biblioteki do przygotowania bootowalnego jądra dla PowerPC
-Group:		Base/Kernel
-Requires:	%{name} = %{epoch}:%{version}-%{release}
-Requires:	mkvmlinuz >= 1.3
-Obsoletes:	kernel-smp-libs
-Autoreqprov:	no
-
-%description libs
-Libraries for preparing bootable kernel on PowerPCs. Script called
-mkvmlinuz may be useful for this.
-
-%description libs -l pl.UTF-8
-Biblioteki do przygotowania bootowalnego jądra dla PowerPC. Skrypt
-mkvmlinuz może być do tego przydatny.
 
 %package sound-alsa
 Summary:	ALSA kernel modules

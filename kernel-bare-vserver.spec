@@ -14,7 +14,7 @@
 
 %define		_basever		2.6.26
 %define		_postver		.3
-%define		_rel			1
+%define		_rel			2
 
 %define		_enable_debug_packages			0
 
@@ -776,6 +776,7 @@ fi
 %{_kernelsrcdir}/arch/*/kernel/asm-offsets*
 %{_kernelsrcdir}/arch/*/kernel/sigframe*.h
 %{_kernelsrcdir}/drivers/lguest/lg.h
+%{_kernelsrcdir}/kernel/bounds.c
 %dir %{_kernelsrcdir}/scripts
 %dir %{_kernelsrcdir}/scripts/kconfig
 %{_kernelsrcdir}/scripts/Kbuild.include
@@ -811,6 +812,7 @@ fi
 %{_kernelsrcdir}/init
 %{_kernelsrcdir}/ipc
 %{_kernelsrcdir}/kernel
+%exclude %{_kernelsrcdir}/kernel/bounds.c
 %{_kernelsrcdir}/lib
 %{_kernelsrcdir}/mm
 %{_kernelsrcdir}/net

@@ -800,6 +800,9 @@ fi
 %defattr(644,root,root,755)
 %{_kernelsrcdir}/arch/*/[!Mk]*
 %{_kernelsrcdir}/arch/*/kernel/[!M]*
+%{_kernelsrcdir}/arch/ia64/kvm
+%{_kernelsrcdir}/arch/powerpc/kvm
+%{_kernelsrcdir}/arch/s390/kvm
 %{_kernelsrcdir}/arch/x86/kvm
 %exclude %{_kernelsrcdir}/arch/*/kernel/asm-offsets*
 %exclude %{_kernelsrcdir}/arch/*/kernel/sigframe*.h
@@ -816,7 +819,7 @@ fi
 %{_kernelsrcdir}/lib
 %{_kernelsrcdir}/mm
 %{_kernelsrcdir}/net
-%{_kernelsrcdir}/virt
+%{_kernelsrcdir}/samples
 %{_kernelsrcdir}/scripts/*
 %exclude %{_kernelsrcdir}/scripts/Kbuild.include
 %exclude %{_kernelsrcdir}/scripts/Makefile*
@@ -830,6 +833,7 @@ fi
 %{_kernelsrcdir}/sound
 %{_kernelsrcdir}/security
 %{_kernelsrcdir}/usr
+%{_kernelsrcdir}/virt
 %{_kernelsrcdir}/COPYING
 %{_kernelsrcdir}/CREDITS
 %{_kernelsrcdir}/MAINTAINERS

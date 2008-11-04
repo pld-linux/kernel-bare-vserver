@@ -12,9 +12,9 @@
 %define		have_sound	1
 %define		have_isa	1
 
-%define		_basever		2.6.26
-%define		_postver		.7
-%define		_rel			1
+%define		_basever		2.6.27
+%define		_postver		.4
+%define		_rel			0.1
 
 %define		_enable_debug_packages			0
 
@@ -38,10 +38,10 @@ Epoch:		3
 License:	GPL v2
 Group:		Base/Kernel
 Source0:	http://www.kernel.org/pub/linux/kernel/v2.6/linux-%{_basever}.tar.bz2
-# Source0-md5:	5169d01c405bc3f866c59338e217968c
+# Source0-md5:	b3e78977aa79d3754cb7f8143d7ddabd
 %if "%{_postver}" != "%{nil}"
 Source1:	http://www.kernel.org/pub/linux/kernel/v2.6/patch-%{version}.bz2
-# Source1-md5:	70e7706e289f759925f6474f26c74b89
+# Source1-md5:	fa7cb6cf1ee5e796e89905806ffc6f01
 %endif
 
 Source2:	kernel-bare-vserver-autoconf.h
@@ -266,6 +266,17 @@ OSS (Open Sound System) Treiber.
 
 %description sound-oss -l pl.UTF-8
 Sterowniki dźwięku OSS (Open Sound System).
+
+%package firmware
+Summary:	Firmware for Linux kernel drivers
+Summary(pl.UTF-8):	Firmware dla sterowników z jądra Linuksa
+Group:		System Environment/Kernel
+
+%description firmware
+Firmware for Linux kernel drivers.
+
+%description firmware -l pl.UTF-8
+Firmware dla sterowników z jądra Linuksa.
 
 %package headers
 Summary:	Header files for the Linux kernel
@@ -663,7 +674,7 @@ fi
 /lib/modules/%{kernel_release}/kernel/crypto
 /lib/modules/%{kernel_release}/kernel/drivers
 %if %{have_drm}
-%exclude /lib/modules/%{kernel_release}/kernel/drivers/char/drm
+%exclude /lib/modules/%{kernel_release}/kernel/drivers/gpu/drm
 %endif
 /lib/modules/%{kernel_release}/kernel/fs
 
@@ -714,7 +725,7 @@ fi
 %if %{have_drm}
 %files drm
 %defattr(644,root,root,755)
-/lib/modules/%{kernel_release}/kernel/drivers/char/drm
+/lib/modules/%{kernel_release}/kernel/drivers/gpu/drm
 %endif
 
 %if %{with pcmcia}
@@ -758,6 +769,58 @@ fi
 /lib/modules/%{kernel_release}/kernel/sound/oss
 %endif
 %endif
+
+%files firmware
+/lib/firmware/atmsar11.fw
+%dir /lib/firmware/cpia2
+/lib/firmware/cpia2/stv0672_vp4.bin
+%dir /lib/firmware/dabusb
+/lib/firmware/dabusb/bitstream.bin
+/lib/firmware/dabusb/firmware.fw
+%dir /lib/firmware/edgeport
+/lib/firmware/edgeport/boot.fw
+/lib/firmware/edgeport/boot2.fw
+/lib/firmware/edgeport/down.fw
+/lib/firmware/edgeport/down2.fw
+/lib/firmware/edgeport/down3.bin
+%dir /lib/firmware/emi26
+/lib/firmware/emi26/bitstream.fw
+/lib/firmware/emi26/firmware.fw
+/lib/firmware/emi26/loader.fw
+%dir /lib/firmware/emi62
+/lib/firmware/emi62/bitstream.fw
+/lib/firmware/emi62/loader.fw
+/lib/firmware/emi62/midi.fw
+/lib/firmware/emi62/spdif.fw
+%dir /lib/firmware/ess
+/lib/firmware/ess/maestro3_assp_kernel.fw
+/lib/firmware/ess/maestro3_assp_minisrc.fw
+/lib/firmware/intelliport2.bin
+%dir /lib/firmware/kaweth
+/lib/firmware/kaweth/new_code.bin
+/lib/firmware/kaweth/new_code_fix.bin
+/lib/firmware/kaweth/trigger_code.bin
+/lib/firmware/kaweth/trigger_code_fix.bin
+%dir /lib/firmware/keyspan_pda
+/lib/firmware/keyspan_pda/keyspan_pda.fw
+/lib/firmware/keyspan_pda/xircom_pgs.fw
+%dir /lib/firmware/korg
+/lib/firmware/korg/k1212.dsp
+/lib/firmware/ti_3410.fw
+/lib/firmware/ti_5052.fw
+%ifarch %{ix86}
+/lib/firmware/tr_smctr.bin
+%endif
+%dir /lib/firmware/ttusb-budget
+/lib/firmware/ttusb-budget/dspbootcode.bin
+%dir /lib/firmware/vicam
+/lib/firmware/vicam/firmware.fw
+/lib/firmware/whiteheat.fw
+/lib/firmware/whiteheat_loader.fw
+%dir /lib/firmware/yamaha
+/lib/firmware/yamaha/ds1_ctrl.fw
+/lib/firmware/yamaha/ds1_dsp.fw
+/lib/firmware/yamaha/ds1e_ctrl.fw
 
 %files headers
 %defattr(644,root,root,755)
@@ -810,6 +873,7 @@ fi
 %{_kernelsrcdir}/block
 %{_kernelsrcdir}/crypto
 %{_kernelsrcdir}/drivers
+%{_kernelsrcdir}/firmware
 %{_kernelsrcdir}/fs
 %{_kernelsrcdir}/grsecurity
 %{_kernelsrcdir}/init

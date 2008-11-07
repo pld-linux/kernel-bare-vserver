@@ -14,7 +14,7 @@
 
 %define		_basever		2.6.27
 %define		_postver		.4
-%define		_rel			0.1
+%define		_rel			1
 
 %define		_enable_debug_packages			0
 
@@ -55,8 +55,8 @@ Source11:	kernel-bare-vserver-x86_64.config
 Patch100:	linux-2.6-vs2.3.patch
 # minimal grsecurity for vserver patched kernel
 Patch101:	linux-2.6-grsec-vs-minimal.patch
-# from squashfs: http://dl.sourceforge.net/sourceforge/squashfs/squashfs3.3.tar.gz
-Patch102:	linux-2.6.25-squashfs.patch
+# from squashfs: http://dl.sourceforge.net/sourceforge/squashfs/squashfs3.4.tar.gz
+Patch102:	linux-2.6.27-squashfs.patch
 
 URL:		http://www.kernel.org/
 BuildRequires:	binutils >= 3:2.14.90.0.7

@@ -41,7 +41,7 @@ Source0:	http://www.kernel.org/pub/linux/kernel/v2.6/linux-%{_basever}.tar.bz2
 # Source0-md5:	b3e78977aa79d3754cb7f8143d7ddabd
 %if "%{_postver}" != "%{nil}"
 Source1:	http://www.kernel.org/pub/linux/kernel/v2.6/patch-%{version}.bz2
-# Source1-md5:	fa7cb6cf1ee5e796e89905806ffc6f01
+# Source1-md5:	5ae2b4af08b35b9ecc3653c8fc6c1905
 %endif
 
 Source2:	kernel-bare-vserver-autoconf.h

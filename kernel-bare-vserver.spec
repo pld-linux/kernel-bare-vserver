@@ -59,14 +59,13 @@ Patch101:	linux-2.6-grsec-vs-minimal.patch
 Patch102:	linux-2.6.27-squashfs.patch
 
 URL:		http://www.kernel.org/
-BuildRequires:	binutils >= 3:2.14.90.0.7
+BuildRequires:	binutils >= 3:2.18
 BuildRequires:	/sbin/depmod
 BuildRequires:	gcc >= 5:3.2
 # for hostname command
 BuildRequires:	net-tools
 BuildRequires:	perl-base
-BuildRequires:	python
-BuildRequires:	python-modules
+BuildRequires:	rpm-build >= 4.4.9-56
 BuildRequires:	rpmbuild(macros) >= 1.217
 Autoreqprov:	no
 Requires(post):	coreutils
@@ -76,8 +75,12 @@ Requires:	/sbin/depmod
 Requires:	coreutils
 Requires:	geninitrd >= 2.57
 Requires:	module-init-tools >= 0.9.9
+Obsoletes:	kernel%{_alt_kernel}-isdn-mISDN
+Obsoletes:	kernel-misc-acer_acpi
 Obsoletes:	kernel-misc-fuse
+Obsoletes:	kernel-misc-uvc
 Obsoletes:	kernel-modules
+Obsoletes:	kernel-net-ar81
 Obsoletes:	kernel-net-hostap
 Obsoletes:	kernel-net-ieee80211
 Obsoletes:	kernel-net-ipp2p

@@ -1705,22 +1705,19 @@ diff -NurpP --minimal linux-2.6.27.26/drivers/md/dm.c linux-2.6.27.26-vs2.3.0.36
  
  	spin_lock(&_minor_lock);
  
-@@ -260,22 +263,19 @@ static int dm_blk_open(struct inode *ino
+@@ -260,18 +263,19 @@ static int dm_blk_open(struct inode *ino
  		goto out;
  
  	if (test_bit(DMF_FREEING, &md->flags) ||
 -	    test_bit(DMF_DELETING, &md->flags)) {
 -		md = NULL;
 +	    test_bit(DMF_DELETING, &md->flags))
- 		goto out;
--	}
- 
--	if (test_bit(DMF_FREEING, &md->flags) ||
--	    test_bit(DMF_DELETING, &md->flags))
--		return NULL;
++		goto out;
++
 +	ret = -EACCES;
 +	if (!vx_check(md->xid, VS_IDENT|VS_HOSTID))
-+		goto out;
+ 		goto out;
+-	}
  
  	dm_get(md);
  	atomic_inc(&md->open_count);

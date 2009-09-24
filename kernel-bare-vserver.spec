@@ -13,7 +13,7 @@
 %define		have_isa	1
 
 %define		_basever		2.6.27
-%define		_postver		.34
+%define		_postver		.35
 %define		_rel			1
 
 %define		_enable_debug_packages			0
@@ -41,7 +41,7 @@ Source0:	http://www.kernel.org/pub/linux/kernel/v2.6/linux-%{_basever}.tar.bz2
 # Source0-md5:	b3e78977aa79d3754cb7f8143d7ddabd
 %if "%{_postver}" != "%{nil}"
 Source1:	http://www.kernel.org/pub/linux/kernel/v2.6/patch-%{version}.bz2
-# Source1-md5:	e9c937fd29350075634f3b4d1a053825
+# Source1-md5:	6d49b54ff6ed54896db5d9e2ab7a6c0c
 %endif
 
 Source2:	kernel-bare-vserver-autoconf.h
@@ -75,6 +75,7 @@ Requires:	/sbin/depmod
 Requires:	coreutils
 Requires:	geninitrd >= 2.57
 Requires:	module-init-tools >= 0.9.9
+Obsoletes:	kernel%{_alt_kernel}-firmware
 Obsoletes:	kernel%{_alt_kernel}-isdn-mISDN
 Obsoletes:	kernel-misc-acer_acpi
 Obsoletes:	kernel-misc-fuse
@@ -269,17 +270,6 @@ OSS (Open Sound System) Treiber.
 
 %description sound-oss -l pl.UTF-8
 Sterowniki dźwięku OSS (Open Sound System).
-
-%package firmware
-Summary:	Firmware for Linux kernel drivers
-Summary(pl.UTF-8):	Firmware dla sterowników z jądra Linuksa
-Group:		System Environment/Kernel
-
-%description firmware
-Firmware for Linux kernel drivers.
-
-%description firmware -l pl.UTF-8
-Firmware dla sterowników z jądra Linuksa.
 
 %package headers
 Summary:	Header files for the Linux kernel
@@ -479,10 +469,11 @@ PreInstallKernel() {
 	install vmlinux $KERNEL_INSTALL_DIR/boot/vmlinux-$KernelVer
 %endif
 
-	%{__make} %CrossOpts modules_install \
+	%{__make} %CrossOpts modules_install firmware_install \
 		%{?with_verbose:V=1} \
 		DEPMOD=%DepMod \
 		INSTALL_MOD_PATH=$KERNEL_INSTALL_DIR \
+		INSTALL_FW_PATH=$KERNEL_INSTALL_DIR/lib/firmware/$KernelVer \
 		KERNELRELEASE=$KernelVer
 
 	# You'd probabelly want to make it somewhat different
@@ -671,6 +662,7 @@ fi
 /boot/vmlinuz-%{kernel_release}
 /boot/System.map-%{kernel_release}
 %ghost %{initrd_dir}/initrd-%{kernel_release}.gz
+/lib/firmware/%{kernel_release}
 %dir /lib/modules/%{kernel_release}
 %dir /lib/modules/%{kernel_release}/kernel
 /lib/modules/%{kernel_release}/kernel/arch
@@ -772,58 +764,6 @@ fi
 /lib/modules/%{kernel_release}/kernel/sound/oss
 %endif
 %endif
-
-%files firmware
-/lib/firmware/atmsar11.fw
-%dir /lib/firmware/cpia2
-/lib/firmware/cpia2/stv0672_vp4.bin
-%dir /lib/firmware/dabusb
-/lib/firmware/dabusb/bitstream.bin
-/lib/firmware/dabusb/firmware.fw
-%dir /lib/firmware/edgeport
-/lib/firmware/edgeport/boot.fw
-/lib/firmware/edgeport/boot2.fw
-/lib/firmware/edgeport/down.fw
-/lib/firmware/edgeport/down2.fw
-/lib/firmware/edgeport/down3.bin
-%dir /lib/firmware/emi26
-/lib/firmware/emi26/bitstream.fw
-/lib/firmware/emi26/firmware.fw
-/lib/firmware/emi26/loader.fw
-%dir /lib/firmware/emi62
-/lib/firmware/emi62/bitstream.fw
-/lib/firmware/emi62/loader.fw
-/lib/firmware/emi62/midi.fw
-/lib/firmware/emi62/spdif.fw
-%dir /lib/firmware/ess
-/lib/firmware/ess/maestro3_assp_kernel.fw
-/lib/firmware/ess/maestro3_assp_minisrc.fw
-/lib/firmware/intelliport2.bin
-%dir /lib/firmware/kaweth
-/lib/firmware/kaweth/new_code.bin
-/lib/firmware/kaweth/new_code_fix.bin
-/lib/firmware/kaweth/trigger_code.bin
-/lib/firmware/kaweth/trigger_code_fix.bin
-%dir /lib/firmware/keyspan_pda
-/lib/firmware/keyspan_pda/keyspan_pda.fw
-/lib/firmware/keyspan_pda/xircom_pgs.fw
-%dir /lib/firmware/korg
-/lib/firmware/korg/k1212.dsp
-/lib/firmware/ti_3410.fw
-/lib/firmware/ti_5052.fw
-%ifarch %{ix86}
-/lib/firmware/tr_smctr.bin
-%endif
-%dir /lib/firmware/ttusb-budget
-/lib/firmware/ttusb-budget/dspbootcode.bin
-%dir /lib/firmware/vicam
-/lib/firmware/vicam/firmware.fw
-/lib/firmware/whiteheat.fw
-/lib/firmware/whiteheat_loader.fw
-%dir /lib/firmware/yamaha
-/lib/firmware/yamaha/ds1_ctrl.fw
-/lib/firmware/yamaha/ds1_dsp.fw
-/lib/firmware/yamaha/ds1e_ctrl.fw
 
 %files headers
 %defattr(644,root,root,755)

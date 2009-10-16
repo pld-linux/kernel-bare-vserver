@@ -12,9 +12,9 @@
 %define		have_sound	1
 %define		have_isa	1
 
-%define		_basever		2.6.27
-%define		_postver		.35
-%define		_rel			1
+%define		_basever		2.6.31
+%define		_postver		.4
+%define		_rel			0.1
 
 %define		_enable_debug_packages			0
 
@@ -38,10 +38,10 @@ Epoch:		3
 License:	GPL v2
 Group:		Base/Kernel
 Source0:	http://www.kernel.org/pub/linux/kernel/v2.6/linux-%{_basever}.tar.bz2
-# Source0-md5:	b3e78977aa79d3754cb7f8143d7ddabd
+# Source0-md5:	84c077a37684e4cbfa67b18154390d8a
 %if "%{_postver}" != "%{nil}"
 Source1:	http://www.kernel.org/pub/linux/kernel/v2.6/patch-%{version}.bz2
-# Source1-md5:	6d49b54ff6ed54896db5d9e2ab7a6c0c
+# Source1-md5:	02078f4231baee4f0004212f2875df2b
 %endif
 
 Source2:	kernel-bare-vserver-autoconf.h
@@ -55,8 +55,6 @@ Source11:	kernel-bare-vserver-x86_64.config
 Patch100:	linux-2.6-vs2.3.patch
 # minimal grsecurity for vserver patched kernel
 Patch101:	linux-2.6-grsec-vs-minimal.patch
-# from squashfs: http://dl.sourceforge.net/sourceforge/squashfs/squashfs3.4.tar.gz
-Patch102:	linux-2.6.27-squashfs.patch
 
 URL:		http://www.kernel.org/
 BuildRequires:	binutils >= 3:2.18
@@ -372,7 +370,6 @@ Pakiet zawiera dokumentację do jądra Linuksa pochodzącą z katalogu
 
 %patch100 -p1
 %patch101 -p1
-%patch102 -p1
 
 # Fix EXTRAVERSION in main Makefile
 sed -i 's#EXTRAVERSION =.*#EXTRAVERSION = %{_postver}-%{alt_kernel}#g' Makefile
@@ -698,7 +695,7 @@ fi
 %exclude /lib/modules/%{kernel_release}/kernel/drivers/isdn/hardware/avm/avm_cs.ko*
 %exclude /lib/modules/%{kernel_release}/kernel/drivers/telephony/ixj_pcmcia.ko*
 %exclude /lib/modules/%{kernel_release}/kernel/drivers/usb/gadget/g_midi.ko*
-%exclude /lib/modules/%{kernel_release}/kernel/drivers/ide/legacy/ide-cs.ko*
+%exclude /lib/modules/%{kernel_release}/kernel/drivers/ide/ide-cs.ko*
 %exclude /lib/modules/%{kernel_release}/kernel/drivers/net/wireless/*_cs.ko*
 %exclude /lib/modules/%{kernel_release}/kernel/drivers/net/wireless/b43
 %exclude /lib/modules/%{kernel_release}/kernel/drivers/net/wireless/hostap/hostap_cs.ko*
@@ -726,14 +723,14 @@ fi
 %if %{with pcmcia}
 %files pcmcia
 %defattr(644,root,root,755)
+%exclude /lib/modules/%{kernel_release}/kernel/drivers/pcmcia/pcmcia*ko*
 /lib/modules/%{kernel_release}/kernel/drivers/pcmcia/*ko*
 /lib/modules/%{kernel_release}/kernel/drivers/*/pcmcia
-%exclude /lib/modules/%{kernel_release}/kernel/drivers/pcmcia/pcmcia*ko*
 /lib/modules/%{kernel_release}/kernel/drivers/bluetooth/*_cs.ko*
 /lib/modules/%{kernel_release}/kernel/drivers/isdn/hardware/avm/avm_cs.ko*
 /lib/modules/%{kernel_release}/kernel/drivers/telephony/ixj_pcmcia.ko*
 /lib/modules/%{kernel_release}/kernel/drivers/ata/pata_pcmcia.ko*
-/lib/modules/%{kernel_release}/kernel/drivers/ide/legacy/ide-cs.ko*
+/lib/modules/%{kernel_release}/kernel/drivers/ide/ide-cs.ko*
 /lib/modules/%{kernel_release}/kernel/drivers/net/wireless/*_cs.ko*
 /lib/modules/%{kernel_release}/kernel/drivers/net/wireless/b43
 /lib/modules/%{kernel_release}/kernel/drivers/net/wireless/hostap/hostap_cs.ko*
@@ -769,6 +766,12 @@ fi
 %defattr(644,root,root,755)
 %dir %{_kernelsrcdir}
 %{_kernelsrcdir}/include
+%dir %{_kernelsrcdir}/arch
+%dir %{_kernelsrcdir}/arch/[!K]*
+%{_kernelsrcdir}/arch/*/include
+%dir %{_kernelsrcdir}/security
+%dir %{_kernelsrcdir}/security/selinux
+%{_kernelsrcdir}/security/selinux/include
 %{_kernelsrcdir}/config-dist
 %{_kernelsrcdir}/Module.symvers-dist
 
@@ -795,6 +798,11 @@ fi
 %{_kernelsrcdir}/scripts/*.sh
 %{_kernelsrcdir}/scripts/kconfig/*
 %{_kernelsrcdir}/scripts/mkcompile_h
+%dir %{_kernelsrcdir}/scripts/selinux
+%{_kernelsrcdir}/scripts/selinux/Makefile
+%dir %{_kernelsrcdir}/scripts/selinux/mdp
+%{_kernelsrcdir}/scripts/selinux/mdp/Makefile
+%{_kernelsrcdir}/scripts/selinux/mdp/*.c
 
 %files doc
 %defattr(644,root,root,755)
@@ -839,6 +847,7 @@ fi
 %exclude %{_kernelsrcdir}/scripts/*.sh
 %{_kernelsrcdir}/sound
 %{_kernelsrcdir}/security
+%{_kernelsrcdir}/tools
 %{_kernelsrcdir}/usr
 %{_kernelsrcdir}/virt
 %{_kernelsrcdir}/COPYING

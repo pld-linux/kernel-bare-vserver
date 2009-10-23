@@ -13,7 +13,7 @@
 %define		have_isa	1
 
 %define		_basever		2.6.31
-%define		_postver		.4
+%define		_postver		.5
 %define		_rel			0.1
 
 %define		_enable_debug_packages			0
@@ -826,7 +826,7 @@ fi
 %{_kernelsrcdir}/drivers
 %{_kernelsrcdir}/firmware
 %{_kernelsrcdir}/fs
-%{_kernelsrcdir}/grsecurity
+#%{_kernelsrcdir}/grsecurity
 %{_kernelsrcdir}/init
 %{_kernelsrcdir}/ipc
 %{_kernelsrcdir}/kernel

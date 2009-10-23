@@ -13,7 +13,7 @@
 %define		have_isa	1
 
 %define		_basever		2.6.27
-%define		_postver		.35
+%define		_postver		.38
 %define		_rel			1
 
 %define		_enable_debug_packages			0
@@ -41,7 +41,7 @@ Source0:	http://www.kernel.org/pub/linux/kernel/v2.6/linux-%{_basever}.tar.bz2
 # Source0-md5:	b3e78977aa79d3754cb7f8143d7ddabd
 %if "%{_postver}" != "%{nil}"
 Source1:	http://www.kernel.org/pub/linux/kernel/v2.6/patch-%{version}.bz2
-# Source1-md5:	6d49b54ff6ed54896db5d9e2ab7a6c0c
+# Source1-md5:	80217587b03706705c4c0c393c1c01b5
 %endif
 
 Source2:	kernel-bare-vserver-autoconf.h

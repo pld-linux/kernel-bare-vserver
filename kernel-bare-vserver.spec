@@ -13,7 +13,7 @@
 %define		have_isa	1
 
 %define		_basever		2.6.27
-%define		_postver		.39
+%define		_postver		.41
 %define		_rel			1
 
 %define		_enable_debug_packages			0
@@ -41,7 +41,7 @@ Source0:	http://www.kernel.org/pub/linux/kernel/v2.6/linux-%{_basever}.tar.bz2
 # Source0-md5:	b3e78977aa79d3754cb7f8143d7ddabd
 %if "%{_postver}" != "%{nil}"
 Source1:	http://www.kernel.org/pub/linux/kernel/v2.6/patch-%{version}.bz2
-# Source1-md5:	9ce07344e2d9e5fe77ca474e8f5bd83a
+# Source1-md5:	a431f1f68badcfa5a6cecc6b4d52d319
 %endif
 
 Source2:	kernel-bare-vserver-autoconf.h
@@ -53,10 +53,11 @@ Source11:	kernel-bare-vserver-x86_64.config
 
 # from http://vserver.13thfloor.at/Experimental/
 Patch100:	linux-2.6-vs2.3.patch
+Patch101:	linux-2.6-vs-dev-mount.patch
 # minimal grsecurity for vserver patched kernel
-Patch101:	linux-2.6-grsec-vs-minimal.patch
+Patch102:	linux-2.6-grsec-vs-minimal.patch
 # from squashfs: http://dl.sourceforge.net/sourceforge/squashfs/squashfs3.4.tar.gz
-Patch102:	linux-2.6.27-squashfs.patch
+Patch103:	linux-2.6.27-squashfs.patch
 
 URL:		http://www.kernel.org/
 BuildRequires:	binutils >= 3:2.18
@@ -373,6 +374,7 @@ Pakiet zawiera dokumentację do jądra Linuksa pochodzącą z katalogu
 %patch100 -p1
 %patch101 -p1
 %patch102 -p1
+%patch103 -p1
 
 # Fix EXTRAVERSION in main Makefile
 sed -i 's#EXTRAVERSION =.*#EXTRAVERSION = %{_postver}-%{alt_kernel}#g' Makefile

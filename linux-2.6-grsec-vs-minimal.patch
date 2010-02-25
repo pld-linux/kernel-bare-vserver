@@ -788,7 +788,7 @@ diff -urNp linux-2.6.32.9/kernel/exit.c linux-2.6.32.9/kernel/exit.c
 diff -urNp linux-2.6.32.9/net/ipv4/inet_hashtables.c linux-2.6.32.9/net/ipv4/inet_hashtables.c
 --- linux-2.6.32.9/net/ipv4/inet_hashtables.c	2010-02-09 07:57:19.000000000 -0500
 +++ linux-2.6.32.9/net/ipv4/inet_hashtables.c	2010-02-23 17:09:56.720158253 -0500
-@@ -18,12 +18,15 @@
+@@ -18,11 +18,14 @@
  #include <linux/sched.h>
  #include <linux/slab.h>
  #include <linux/wait.h>
@@ -796,7 +796,6 @@ diff -urNp linux-2.6.32.9/net/ipv4/inet_hashtables.c linux-2.6.32.9/net/ipv4/ine
  
  #include <net/inet_connection_sock.h>
  #include <net/inet_hashtables.h>
- #include <net/route.h>
  #include <net/ip.h>
  
 +extern void gr_update_task_in_ip_table(struct task_struct *task, const struct inet_sock *inet);
@@ -1055,9 +1054,9 @@ diff -urNp linux-2.6.32.9/fs/proc/internal.h linux-2.6.32.9/fs/proc/internal.h
 --- linux-2.6.32.9/fs/proc/internal.h	2010-02-09 07:57:19.000000000 -0500
 +++ linux-2.6.32.9/fs/proc/internal.h	2010-02-23 17:09:53.292465795 -0500
 @@ -51,6 +51,9 @@ extern int proc_pid_status(struct seq_fi
- extern int proc_pid_nsproxy(struct seq_file *m, struct pid_namespace *ns,
  				struct pid *pid, struct task_struct *task);
- 
+ extern int proc_pid_statm(struct seq_file *m, struct pid_namespace *ns,
+ 				struct pid *pid, struct task_struct *task);
 +#ifdef CONFIG_GRKERNSEC_PROC_IPADDR
 +extern int proc_pid_ipaddr(struct task_struct *task, char *buffer);
 +#endif
@@ -1229,9 +1228,6 @@ diff -urNp linux-2.6.32.9/mm/slab.c linux-2.6.32.9/mm/slab.c
  
  static void print_slabinfo_header(struct seq_file *m)
  {
-diff -urNp linux-2.6.32.9/mm/slub.c linux-2.6.32.9/mm/slub.c
---- linux-2.6.32.9/mm/slub.c	2010-02-09 07:57:19.000000000 -0500
-+++ linux-2.6.32.9/mm/slub.c	2010-02-23 17:09:56.656790635 -0500
 @@ -4696,7 +4737,7 @@ __initcall(slab_sysfs_init);
  /*
   * The /proc/slabinfo ABI

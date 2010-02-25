@@ -369,7 +369,7 @@ Pakiet zawiera dokumentację do jądra Linuksa pochodzącą z katalogu
 %endif
 
 %patch100 -p1
-#%patch101 -p1
+%patch101 -p1
 
 # Fix EXTRAVERSION in main Makefile
 sed -i 's#EXTRAVERSION =.*#EXTRAVERSION = %{_postver}-%{alt_kernel}#g' Makefile
@@ -830,7 +830,7 @@ fi
 %{_kernelsrcdir}/drivers
 %{_kernelsrcdir}/firmware
 %{_kernelsrcdir}/fs
-#%{_kernelsrcdir}/grsecurity
+%{_kernelsrcdir}/grsecurity
 %{_kernelsrcdir}/init
 %{_kernelsrcdir}/ipc
 %{_kernelsrcdir}/kernel

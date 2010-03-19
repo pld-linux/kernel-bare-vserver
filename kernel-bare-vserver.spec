@@ -55,6 +55,8 @@ Source11:	kernel-bare-vserver-x86_64.config
 Patch100:	linux-2.6-vs2.3.patch
 # minimal grsecurity for vserver patched kernel
 Patch101:	linux-2.6-grsec-vs-minimal.patch
+# Other patches
+Patch102:	linux-2.6-vs-dev-mount.patch
 
 URL:		http://www.kernel.org/
 BuildRequires:	binutils >= 3:2.18
@@ -370,6 +372,7 @@ Pakiet zawiera dokumentację do jądra Linuksa pochodzącą z katalogu
 
 %patch100 -p1
 %patch101 -p1
+%patch102 -p1
 
 # Fix EXTRAVERSION in main Makefile
 sed -i 's#EXTRAVERSION =.*#EXTRAVERSION = %{_postver}-%{alt_kernel}#g' Makefile

@@ -671,19 +671,22 @@ fi
 /lib/modules/%{kernel_release}/kernel/arch
 /lib/modules/%{kernel_release}/kernel/crypto
 /lib/modules/%{kernel_release}/kernel/drivers
+
 %if %{have_drm}
 %exclude /lib/modules/%{kernel_release}/kernel/drivers/gpu/drm
 %endif
-/lib/modules/%{kernel_release}/kernel/fs
 
+/lib/modules/%{kernel_release}/kernel/fs
 # this directory will be removed after disabling rcutorture mod. in 2.6.20.
 /lib/modules/%{kernel_release}/kernel/kernel
-
 /lib/modules/%{kernel_release}/kernel/lib
+
 %ifarch %{x8664}
 /lib/modules/%{kernel_release}/kernel/mm
 %endif
+
 /lib/modules/%{kernel_release}/kernel/net
+
 %if %{have_sound}
 %dir /lib/modules/%{kernel_release}/kernel/sound
 /lib/modules/%{kernel_release}/kernel/sound/ac97_bus.ko*
@@ -692,7 +695,9 @@ fi
 %exclude /lib/modules/%{kernel_release}/kernel/drivers/media/video/em28xx/em28xx-alsa.ko*
 %exclude /lib/modules/%{kernel_release}/kernel/drivers/media/video/saa7134/saa7134-alsa.ko*
 %endif
+
 %dir /lib/modules/%{kernel_release}/misc
+
 %if %{with pcmcia}
 %dir /lib/modules/%{kernel_release}/kernel/drivers/pcmcia
 /lib/modules/%{kernel_release}/kernel/drivers/pcmcia/pcmcia*ko*
@@ -710,9 +715,11 @@ fi
 %exclude /lib/modules/%{kernel_release}/kernel/drivers/net/wireless/hostap/hostap_cs.ko*
 %exclude /lib/modules/%{kernel_release}/kernel/drivers/net/wireless/libertas/*_cs.ko*
 %exclude /lib/modules/%{kernel_release}/kernel/drivers/parport/parport_cs.ko*
-%exclude /lib/modules/%{kernel_release}/kernel/drivers/serial/serial_cs.ko*
 %exclude /lib/modules/%{kernel_release}/kernel/drivers/usb/host/sl811_cs.ko*
 %endif
+
+/lib/modules/%{kernel_release}/kernel/security
+
 %ghost /lib/modules/%{kernel_release}/modules.*
 # symlinks pointing to kernelsrcdir
 %ghost /lib/modules/%{kernel_release}/build
@@ -745,7 +752,6 @@ fi
 /lib/modules/%{kernel_release}/kernel/drivers/net/wireless/hostap/hostap_cs.ko*
 /lib/modules/%{kernel_release}/kernel/drivers/net/wireless/libertas/*_cs.ko*
 /lib/modules/%{kernel_release}/kernel/drivers/parport/parport_cs.ko*
-/lib/modules/%{kernel_release}/kernel/drivers/serial/serial_cs.ko*
 /lib/modules/%{kernel_release}/kernel/drivers/usb/host/sl811_cs.ko*
 %endif
 

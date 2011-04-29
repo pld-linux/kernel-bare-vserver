@@ -1,0 +1,12 @@
+diff -ur linux-2.6.27.orig/fs/namespace.c linux-2.6.27/fs/namespace.c
+--- linux-2.6.27.orig/fs/namespace.c	2009-12-08 16:14:00.678582752 +0100
++++ linux-2.6.27/fs/namespace.c	2009-12-08 16:17:14.114813512 +0100
+@@ -2009,7 +2009,7 @@
+ 	if (flags & MS_RDONLY)
+ 		mnt_flags |= MNT_READONLY;
+ 
+-	if (!capable(CAP_SYS_ADMIN))
++	if (!vx_capable(CAP_SYS_ADMIN, VXC_SECURE_MOUNT))
+ 		mnt_flags |= MNT_NODEV;
+ 	flags &= ~(MS_NOSUID | MS_NOEXEC | MS_NODEV | MS_ACTIVE |
+ 		   MS_NOATIME | MS_NODIRATIME | MS_RELATIME| MS_KERNMOUNT);

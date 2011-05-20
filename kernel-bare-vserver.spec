@@ -13,7 +13,7 @@
 %define		have_isa	1
 
 %define		_basever		2.6.38
-%define		_postver		.4
+%define		_postver		.6
 %define		_rel			0.1
 
 %define		_enable_debug_packages			0
@@ -41,7 +41,7 @@ Source0:	http://www.kernel.org/pub/linux/kernel/v2.6/linux-%{_basever}.tar.bz2
 # Source0-md5:	7d471477bfa67546f902da62227fa976
 %if "%{_postver}" != "%{nil}"
 Source1:	http://www.kernel.org/pub/linux/kernel/v2.6/patch-%{version}.bz2
-# Source1-md5:	6ef1279c7bd0078fc0fd50aa83e86203
+# Source1-md5:	527fab8162c682ad849eb21fc30d28ef
 %endif
 
 Source2:	kernel-bare-vserver-autoconf.h
@@ -376,7 +376,7 @@ Pakiet zawiera dokumentację do jądra Linuksa pochodzącą z katalogu
 %endif
 
 %patch100 -p1
-#%patch101 -p1
+%patch101 -p1
 %patch102 -p1
 
 %patch200 -p1
